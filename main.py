@@ -277,6 +277,7 @@ def menu_interface(message, message_id):
 
     button_chanel = types.InlineKeyboardButton(f"Канал с поездками", callback_data=f"button_chanel",
                                                url='https://t.me/poputi_innopolis')
+    button_trips = types.InlineKeyboardButton(f"Список поездок", callback_data=f"button_trips")
     button_find_trip = types.InlineKeyboardButton(f"Хочу уехать", callback_data=f"button_find_trip")
     button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
     button_profile = types.InlineKeyboardButton(f"Мой профиль", callback_data=f"button_profile")
@@ -302,6 +303,25 @@ def menu_interface(message, message_id):
 #     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
 #                           text=f"Хочу уехать меню",
 #                           reply_markup=bottons)
+def trips_interface(message, message_id):
+    bottons = types.InlineKeyboardMarkup(row_width=2)
+
+
+    button_my_activ_trips = types.InlineKeyboardButton(f"Фильтр", callback_data=f"button_my_activ_trips")
+
+    button_1 = types.InlineKeyboardButton(f"◀️", callback_data=f"1")
+    button_2 = types.InlineKeyboardButton(f"▶️", callback_data=f"1")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+
+    bottons.add(button_my_activ_trips, button_my_history_trips)
+    bottons.add(button_my_data_profile)
+    bottons.add(button_back_to_menu)
+
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                          text=f"Профиль меню",
+                          reply_markup=bottons)
+
+
 def find_trip_interface(message, message_id, step=1, from_city='', end_city='', date_trip='', time_trip='',
                        price_trip='250'):
     if step == 1:
@@ -525,6 +545,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
                               f"Дата: {date_trip.replace('=', '.')}\n"
                               f"Время: {time_trip.replace('=', ':')}\n\n"
                               f"Описание:\n{read_flag(message.chat.id)}\n\n"
+                              f"Автор: @{message.chat.username}\n"
                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль водителя</a>", parse_mode="html")
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
@@ -735,6 +756,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
                               f"Дата: {date_trip.replace('=', '.')}\n"
                               f"Время: {time_trip.replace('=', ':')}\n\n"
                               f"Описание:\n{read_flag(message.chat.id)}\n\n"
+                              f"Автор: @{message.chat.username}\n"
                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль водителя</a>",
                          parse_mode="html")
 
