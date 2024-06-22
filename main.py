@@ -8,6 +8,8 @@ import csv
 from datetime import datetime
 
 bot = telebot.TeleBot(token)
+
+
 # -1002201873715
 
 # ============================== Логи ==============================
@@ -132,88 +134,104 @@ def get_info_trip(trip_id):
         return trip_info
 
 
-def new_active_trip(from_city, from_point, to_city, to_point, date, time, places_in_car, car, driver_id):
-    df = pd.read_csv('active_trips.csv')
-    new_trip_id = df["trip_id"].max() + 1 if not df.empty else 1
+import pandas as pd
 
-    new_trip_data = {
-        'trip_id': new_trip_id,
-        'from_city': from_city,
-        'from_point': from_point,
-        'to_city': to_city,
-        'to_point': to_point,
-        'date': date,
-        'time': time,
-        'places_in_car': places_in_car,
-        'car': car,
-        'driver_id': driver_id
-    }
-    df = df.append(new_trip_data, ignore_index=True)
+
+def active_trip(user_id=None, unic_trip_id=None, message_id=None, from_city=None, end_city=None,
+                date_trip=None, time_trip=None, price_trip=None, description_trip=None,
+                list_people_id=None, is_verified=None, is_arhive=None, is_users_have_report=None, admins_list=[], all_trips=False):
+    # Чтение данных из CSV файла
+    df = pd.read_csv('active_trips.csv')
+
+    # Функция для сохранения изменений в CSV файл
+    def save_to_csv(dataframe):
+        dataframe.to_csv('active_trips.csv', index=False)
+
+    if all_trips:
+        return df.to_dict('records')
+
+    # Если указан только unic_trip_id и все остальные параметры равны None
+    elif unic_trip_id is not None and user_id is None and message_id is None and from_city is None \
+            and end_city is None and date_trip is None and time_trip is None and price_trip is None \
+            and description_trip is None and list_people_id is None and is_verified is None \
+            and is_arhive is None and is_users_have_report is None:
+        result = df[df['unic_trip_id'] == unic_trip_id]
+        return result.to_dict('records')
+
+        # Если указан только user_id и все остальные параметры равны None
+    elif user_id is not None and unic_trip_id is None and message_id is None and from_city is None \
+            and end_city is None and date_trip is None and time_trip is None and price_trip is None \
+            and description_trip is None and list_people_id is None and is_verified is None \
+            and is_arhive is None and is_users_have_report is None:
+        result = df[df['user_id'] == user_id]
+        return result.to_dict('records')
+
+    # Если unic_trip_id=None, записываем новые данные в БД
+    elif unic_trip_id is None:
+        new_unic_trip_id = 1
+        try:
+            max_unic_trip_id = len(df['unic_trip_id'])
+            new_unic_trip_id = max_unic_trip_id + 1
+        except:
+            new_unic_trip_id = 1
+
+        new_data = {
+            'user_id': user_id,
+            'unic_trip_id': new_unic_trip_id,
+            'message_id': -1,
+            'from_city': from_city,
+            'end_city': end_city,
+            'date_trip': date_trip,
+            'time_trip': time_trip,
+            'price_trip': price_trip,
+            'description_trip': description_trip,
+            'list_people_id': [],
+            'is_verified': False,
+            'is_arhive': False,
+            'is_users_have_report': False,
+            'admins_list': admins_list
+        }
+        # df = df.append(new_data, ignore_index=True)
+        df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+        save_to_csv(df)
+        return new_unic_trip_id
+
+    # Если unic_trip_id указан, обновляем данные по этому уникальному идентификатору
+    elif unic_trip_id is not None:
+        mask = (df['unic_trip_id'] == unic_trip_id)
+        if mask.any():
+            df.loc[mask, 'user_id'] = user_id if user_id is not None else df.loc[mask, 'user_id']
+            df.loc[mask, 'message_id'] = message_id if message_id is not None else df.loc[mask, 'message_id']
+            df.loc[mask, 'from_city'] = from_city if from_city is not None else df.loc[mask, 'from_city']
+            df.loc[mask, 'end_city'] = end_city if end_city is not None else df.loc[mask, 'end_city']
+            df.loc[mask, 'date_trip'] = date_trip if date_trip is not None else df.loc[mask, 'date_trip']
+            df.loc[mask, 'time_trip'] = time_trip if time_trip is not None else df.loc[mask, 'time_trip']
+            df.loc[mask, 'price_trip'] = price_trip if price_trip is not None else df.loc[mask, 'price_trip']
+            df.loc[mask, 'description_trip'] = description_trip if description_trip is not None else df.loc[
+                mask, 'description_trip']
+            df.loc[mask, 'list_people_id'] = list_people_id if list_people_id is not None else df.loc[
+                mask, 'list_people_id']
+            df.loc[mask, 'is_verified'] = is_verified if is_verified is not None else df.loc[mask, 'is_verified']
+            df.loc[mask, 'is_arhive'] = is_arhive if is_arhive is not None else df.loc[mask, 'is_arhive']
+            df.loc[mask, 'is_users_have_report'] = is_users_have_report if is_users_have_report is not None else df.loc[
+                mask, 'is_users_have_report']
+            df.loc[mask, 'admins_list'] = f"{admins_list}"
+            save_to_csv(df)
+            return
+
+
+def del_active_trip(unic_trip_id):
+    # Step 1: Read the CSV file into a DataFrame
+    df = pd.read_csv('active_trips.csv')
+
+    # Step 2: Locate the row(s) where unic_trip_id matches
+    rows_to_delete = df[df['unic_trip_id'] == unic_trip_id].index
+
+    # Step 3: Delete the row(s) from the DataFrame
+    df.drop(rows_to_delete, inplace=True)
+
+    # Step 4: Save the updated DataFrame back to the CSV file
     df.to_csv('active_trips.csv', index=False)
-
-
-def new_temp_trip(from_city='~Не заполнено~', from_point='~Не заполнено~', to_city='~Не заполнено~',
-                  to_point='~Не заполнено~', date='~Не заполнено~', time='~Не заполнено~',
-                  places_in_car='~Не заполнено~', car='~Не заполнено~', driver_id=0):
-    df = pd.read_csv('temp_trip.csv')
-
-    if driver_id in df['driver_id'].values:
-        if (from_city != '~Не заполнено~' or from_point != '~Не заполнено~' or
-                to_city != '~Не заполнено~' or to_point != '~Не заполнено~' or
-                date != '~Не заполнено~' or time != '~Не заполнено~' or
-                places_in_car != '~Не заполнено~' or car != '~Не заполнено~'):
-
-            if from_city != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['from_city']] = [from_city]
-
-            if from_point != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['from_point']] = [from_point]
-
-            if to_city != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['to_city']] = [to_city]
-
-            if to_point != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['to_point']] = [to_point]
-
-            if date != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['date']] = [date]
-
-            if time != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['time']] = [time]
-
-            if places_in_car != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['places_in_car']] = [places_in_car]
-
-            if car != '~Не заполнено~':
-                df.loc[df['driver_id'] == driver_id, ['car']] = [car]
-    else:
-        new_trip_data = pd.DataFrame({
-            'from_city': [from_city],
-            'from_point': [from_point],
-            'to_city': [to_city],
-            'to_point': [to_point],
-            'date': [date],
-            'time': [time],
-            'places_in_car': [places_in_car],
-            'car': [car],
-            'driver_id': [driver_id]
-        })
-        df = pd.concat([df, new_trip_data], ignore_index=True)
-
-    df.to_csv('temp_trip.csv', index=False)
-
-
-def get_temp_trip_info(driver_id):
-    df = pd.read_csv('temp_trip.csv')
-    trip_info = df[df['driver_id'] == driver_id]
-    return trip_info.to_dict('records')[0]
-
-
-def get_trips_for_panel():
-    df = pd.read_csv('active_trips.csv')
-    trips = df[["trip_id", 'from_city', 'to_city', 'date', 'time', 'places_in_car']].to_dict(
-        orient='records')
-    return trips
 
 
 def split_list(input_list, chunk_size):
@@ -239,10 +257,12 @@ def get_name2_by_name(name):
     result = df[df['name'] == name]['name2'].tolist()
     return result[0]
 
+
 def get_name_by_name2(name2):
     df = pd.read_csv('Cities.csv')
     result = df[df['name2'] == name2]['name'].tolist()
     return result[0]
+
 
 # ============================== главные функции ==============================
 @bot.message_handler(commands=['start'])
@@ -252,7 +272,7 @@ def start(message):
     do_del_mes(user_id=user_id)
 
     if cheak_new_user(user_id=user_id):
-        add_user(user_id, 1, 1)
+        add_user(user_id, 1, message.chat.username)
         message_id = bot.send_message(user_id, f"Открываю").message_id
         menu_interface(message, message_id)
         write_for_del_mes(user_id, message_id)
@@ -267,8 +287,8 @@ def start(message):
 @bot.message_handler(commands=['go'])
 def go(message):
     bot.send_message(chat_id=-1002201873715,
-                          text="текст\n"
-                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>link text</a>", parse_mode="html")
+                     text="текст\n"
+                          "<a href='https://t.me/poputi_inno_bot?start=my_action'>link text</a>", parse_mode="html")
 
 
 # ============================== интерфейсы ==============================
@@ -282,7 +302,7 @@ def menu_interface(message, message_id):
     button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
     button_profile = types.InlineKeyboardButton(f"Мой профиль", callback_data=f"button_profile")
 
-    bottons.add(button_chanel)
+    bottons.add(button_trips, button_chanel)
     bottons.add(button_find_trip, button_new_trip)
     bottons.add(button_profile)
 
@@ -303,27 +323,42 @@ def menu_interface(message, message_id):
 #     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
 #                           text=f"Хочу уехать меню",
 #                           reply_markup=bottons)
-def trips_interface(message, message_id):
+def trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-
-    button_my_activ_trips = types.InlineKeyboardButton(f"Фильтр", callback_data=f"button_my_activ_trips")
-
-    button_1 = types.InlineKeyboardButton(f"◀️", callback_data=f"1")
-    button_2 = types.InlineKeyboardButton(f"▶️", callback_data=f"1")
+    # filters = types.InlineKeyboardButton(f"filters", callback_data=f"filters")
     button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
 
-    bottons.add(button_my_activ_trips, button_my_history_trips)
-    bottons.add(button_my_data_profile)
-    bottons.add(button_back_to_menu)
+    # bottons.add(filters)
 
+    list_of_active_trips = active_trip(all_trips=True)
+
+    split_list_of_active_trips = split_list(list_of_active_trips, 10)
+
+    for i in split_list_of_active_trips[page]:
+        bottons.add(types.InlineKeyboardButton(
+            f"{i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
+            callback_data=f"trip_{i['unic_trip_id']}"))
+    if len(split_list_of_active_trips) > 1:
+        if page == 0:
+            right = types.InlineKeyboardButton(f"▶️", callback_data=f"right_{page + 1}")
+            bottons.add(right)
+        else:
+            left = types.InlineKeyboardButton(f"◀️", callback_data=f"left_{page - 1}")
+            if page + 1 < len(split_list_of_active_trips):
+                right = types.InlineKeyboardButton(f"️▶️", callback_data=f"right_{page + 1}")
+                bottons.add(left, right)
+            else:
+                bottons.add(left)
+
+    bottons.add(button_back_to_menu)
     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                          text=f"Профиль меню",
+                          text=f"page {page + 1}",
                           reply_markup=bottons)
 
 
 def find_trip_interface(message, message_id, step=1, from_city='', end_city='', date_trip='', time_trip='',
-                       price_trip='250'):
+                        price_trip='250'):
     if step == 1:
         bottons = types.InlineKeyboardMarkup(row_width=2)
 
@@ -338,6 +373,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Уеду ОТКУДА",
                               reply_markup=bottons)
+
     elif step == 2:
         bottons = types.InlineKeyboardMarkup(row_width=2)
 
@@ -352,6 +388,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Уеду КУДА",
                               reply_markup=bottons)
+
     elif step == 3:
         bottons = types.InlineKeyboardMarkup(row_width=8)
 
@@ -452,13 +489,13 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         button_M = types.InlineKeyboardButton(f"{M}", callback_data=f"1")
 
         bottons.add(button_1)
-        bottons.add(button_up_d, button_space, button_up_m, button_space, button_up_y)
-        bottons.add(button_d, button_point, button_m, button_point, button_y)
-        bottons.add(button_down_d, button_space, button_down_m, button_space, button_down_y)
+        bottons.add(button_up_d, button_space, button_up_m)
+        bottons.add(button_d, button_point, button_m)
+        bottons.add(button_down_d, button_space, button_down_m)
         bottons.add(button_2)
-        bottons.add(button_plus3h, button_up_H, button_space, button_up_M, button_plus15m)
-        bottons.add(button_space, button_H, button_wpoint, button_M, button_space)
-        bottons.add(button_minus3h, button_down_H, button_space, button_down_M, button_minus15m)
+        bottons.add(button_up_H, button_space, button_up_M)
+        bottons.add(button_H, button_wpoint, button_M)
+        bottons.add(button_down_H, button_space, button_down_M)
 
         ok = types.InlineKeyboardButton(f"Готово", callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
         button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"f_{from_city}")
@@ -534,19 +571,55 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
                                    f"Куда: {get_name_by_name2(int(end_city))}\n\n"
                                    f"Дата: {date_trip.replace('=', '.')}\n"
                                    f"Время: {time_trip.replace('=', ':')}\n\n"
-                                   f"Описание:\n{read_flag(message.chat.id)}",
-                              reply_markup=bottons)
+                                   f"Описание:\n{read_flag(message.chat.id)}\n"
+                                   f"Цена <strong>{price_trip}</strong>\n",
+                              reply_markup=bottons, parse_mode="html")
 
     elif step == 7:
-        bot.send_message(chat_id=-1002201873715,
-                         text=f"Уеду\n\n"
-                              f"Откуда: {get_name_by_name2(int(from_city))}\n"
-                              f"Куда: {get_name_by_name2(int(end_city))}\n\n"
-                              f"Дата: {date_trip.replace('=', '.')}\n"
-                              f"Время: {time_trip.replace('=', ':')}\n\n"
-                              f"Описание:\n{read_flag(message.chat.id)}\n\n"
-                              f"Автор: @{message.chat.username}\n"
-                              "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль водителя</a>", parse_mode="html")
+        admins_list = []
+        for admin_id in admins:
+            bottons = types.InlineKeyboardMarkup(row_width=2)
+
+            button_admin_yes = types.InlineKeyboardButton(f"place", callback_data=f"q")
+            button_admin_no = types.InlineKeyboardButton(f"place", callback_data=f"q")
+            bottons.add(button_admin_yes, button_admin_no)
+
+            admin_message_id = bot.send_message(admin_id, text=f"Уеду\n\n"
+                                                               f"Откуда: {get_name_by_name2(int(from_city))}\n"
+                                                               f"Куда: {get_name_by_name2(int(end_city))}\n\n"
+                                                               f"Дата: {date_trip.replace('=', '.')}\n"
+                                                               f"Время: {time_trip.replace('=', ':')}\n\n"
+                                                               f"Описание:\n{read_flag(message.chat.id)}\n\n"
+                                                               f"Цена <strong>{price_trip}</strong>\n"
+                                                               f"Автор: @{message.chat.username}\n"
+                                                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                                parse_mode="html", reply_markup=bottons).message_id
+
+            admins_list.append([admin_id, admin_message_id])
+
+        unic_trip_id = active_trip(user_id=message.chat.id, from_city=get_name_by_name2(int(from_city)),
+                                   end_city=get_name_by_name2(int(end_city)),
+                                   date_trip=date_trip, time_trip=time_trip, price_trip=price_trip,
+                                   description_trip=read_flag(message.chat.id),
+                                   list_people_id=[], admins_list=admins_list)
+
+        for i in admins_list:
+            bottons = types.InlineKeyboardMarkup(row_width=2)
+
+            button_admin_yes = types.InlineKeyboardButton(f"yes", callback_data=f"button_admin_yes_{unic_trip_id}")
+            button_admin_no = types.InlineKeyboardButton(f"no", callback_data=f"button_admin_no_{unic_trip_id}")
+            bottons.add(button_admin_yes, button_admin_no)
+
+            bot.edit_message_text(chat_id=i[0], message_id=i[1], text=f"Уеду\n\n"
+                                                                      f"Откуда: {get_name_by_name2(int(from_city))}\n"
+                                                                      f"Куда: {get_name_by_name2(int(end_city))}\n\n"
+                                                                      f"Дата: {date_trip.replace('=', '.')}\n"
+                                                                      f"Время: {time_trip.replace('=', ':')}\n\n"
+                                                                      f"Описание:\n{read_flag(message.chat.id)}\n\n"
+                                                                      f"Цена <strong>{price_trip}</strong>\n"
+                                                                      f"Автор: @{message.chat.username}\n"
+                                                                      "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                  parse_mode="html", reply_markup=bottons)
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
@@ -554,11 +627,12 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                              text=f"Размещено",
+                              text=f"Отправлено на проверку",
                               reply_markup=bottons)
 
 
-def new_trip_interface(message, message_id, step=1, from_city='', end_city='', date_trip='', time_trip='', price_trip='250'):
+def new_trip_interface(message, message_id, step=1, from_city='', end_city='', date_trip='', time_trip='',
+                       price_trip='250'):
     if step == 1:
         bottons = types.InlineKeyboardMarkup(row_width=2)
 
@@ -573,6 +647,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Подвезу ОТКУДА",
                               reply_markup=bottons)
+
     elif step == 2:
         bottons = types.InlineKeyboardMarkup(row_width=2)
 
@@ -587,6 +662,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Подвезу КУДА",
                               reply_markup=bottons)
+
     elif step == 3:
         bottons = types.InlineKeyboardMarkup(row_width=8)
 
@@ -643,28 +719,41 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
                 ret += cr + i
             return ret
 
-
         sp = '󠀠󠀠󠁝     '
-        button_up_d = types.InlineKeyboardButton(f"🔼" if d != 31 else sp, callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'd', 1)}_{time_trip}")
-        button_down_d = types.InlineKeyboardButton(f"🔽" if d != 1 else sp, callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'd', -1)}_{time_trip}")
+        button_up_d = types.InlineKeyboardButton(f"🔼" if d != 31 else sp,
+                                                 callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'd', 1)}_{time_trip}")
+        button_down_d = types.InlineKeyboardButton(f"🔽" if d != 1 else sp,
+                                                   callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'd', -1)}_{time_trip}")
 
-        button_up_m = types.InlineKeyboardButton(f"🔼" if m != 12 else sp, callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'm', 1)}_{time_trip}")
-        button_down_m = types.InlineKeyboardButton(f"🔽" if m != 1 else sp, callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'm', -1)}_{time_trip}")
+        button_up_m = types.InlineKeyboardButton(f"🔼" if m != 12 else sp,
+                                                 callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'm', 1)}_{time_trip}")
+        button_down_m = types.InlineKeyboardButton(f"🔽" if m != 1 else sp,
+                                                   callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'm', -1)}_{time_trip}")
 
-        button_up_y = types.InlineKeyboardButton(f"🔼", callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'y', 1)}_{time_trip}")
-        button_down_y = types.InlineKeyboardButton(f"🔽", callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'y', -1)}_{time_trip}")
+        button_up_y = types.InlineKeyboardButton(f"🔼",
+                                                 callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'y', 1)}_{time_trip}")
+        button_down_y = types.InlineKeyboardButton(f"🔽",
+                                                   callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'y', -1)}_{time_trip}")
 
-        button_up_H = types.InlineKeyboardButton(f"🔼" if H != 23 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 1)}")
-        button_down_H = types.InlineKeyboardButton(f"🔽" if H != 0 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', -1)}")
+        button_up_H = types.InlineKeyboardButton(f"🔼" if H != 23 else sp,
+                                                 callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 1)}")
+        button_down_H = types.InlineKeyboardButton(f"🔽" if H != 0 else sp,
+                                                   callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', -1)}")
 
-        button_up_M = types.InlineKeyboardButton(f"🔼" if M != 59 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', 1)}")
-        button_down_M = types.InlineKeyboardButton(f"🔽" if M != 0 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -1)}")
+        button_up_M = types.InlineKeyboardButton(f"🔼" if M != 59 else sp,
+                                                 callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', 1)}")
+        button_down_M = types.InlineKeyboardButton(f"🔽" if M != 0 else sp,
+                                                   callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -1)}")
 
-        button_plus3h = types.InlineKeyboardButton(f"⬆️ 3ч" if H != 23 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 3)}")
-        button_minus3h = types.InlineKeyboardButton(f"⬇️ 3ч" if H != 0 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', -3)}")
+        button_plus3h = types.InlineKeyboardButton(f"⬆️ 3ч" if H != 23 else sp,
+                                                   callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 3)}")
+        button_minus3h = types.InlineKeyboardButton(f"⬇️ 3ч" if H != 0 else sp,
+                                                    callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', -3)}")
 
-        button_plus15m = types.InlineKeyboardButton(f"⬆️ 15м" if M != 59 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', 15)}")
-        button_minus15m = types.InlineKeyboardButton(f"⬇️ 15м" if M != 0 else sp, callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -15)}")
+        button_plus15m = types.InlineKeyboardButton(f"⬆️ 15м" if M != 59 else sp,
+                                                    callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', 15)}")
+        button_minus15m = types.InlineKeyboardButton(f"⬇️ 15м" if M != 0 else sp,
+                                                     callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -15)}")
 
         button_d = types.InlineKeyboardButton(f"{d}", callback_data=f"1")
         button_m = types.InlineKeyboardButton(f"{m}", callback_data=f"1")
@@ -674,23 +763,23 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         button_M = types.InlineKeyboardButton(f"{M}", callback_data=f"1")
 
         bottons.add(button_1)
-        bottons.add(button_up_d,        button_space,         button_up_m,        button_space,       button_up_y)
-        bottons.add(button_d,           button_point,         button_m,           button_point,       button_y)
-        bottons.add(button_down_d,      button_space,         button_down_m,      button_space,       button_down_y)
+        bottons.add(button_up_d, button_space, button_up_m)
+        bottons.add(button_d, button_point, button_m)
+        bottons.add(button_down_d, button_space, button_down_m)
         bottons.add(button_2)
-        bottons.add(button_plus3h,      button_up_H,          button_space,       button_up_M,        button_plus15m)
-        bottons.add(button_space,       button_H,             button_wpoint,      button_M,           button_space)
-        bottons.add(button_minus3h,     button_down_H,        button_space,       button_down_M,      button_minus15m)
+        bottons.add(button_up_H, button_space, button_up_M)
+        bottons.add(button_H, button_wpoint, button_M)
+        bottons.add(button_down_H, button_space, button_down_M)
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}")
+        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"f_{from_city}")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
 
         try:
             bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                                  text=f"Подвезу КОГДА",
+                                  text=f"Уеду КОГДА",
                                   reply_markup=bottons)
         except:
             pass
@@ -698,19 +787,27 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
     elif step == 4:
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        button_plus1 = types.InlineKeyboardButton(f"+1", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) + 1}")
-        button_plus10 = types.InlineKeyboardButton(f"+10", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) + 10}")
-        button_plus100 = types.InlineKeyboardButton(f"+100", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) + 100}")
+        button_plus1 = types.InlineKeyboardButton(f"+1",
+                                                  callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) + 1}")
+        button_plus10 = types.InlineKeyboardButton(f"+10",
+                                                   callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) + 10}")
+        button_plus100 = types.InlineKeyboardButton(f"+100",
+                                                    callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) + 100}")
 
-        button_minus1 = types.InlineKeyboardButton(f"-1", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) - 1}")
-        button_minus10 = types.InlineKeyboardButton(f"-10", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) - 10}")
-        button_minus100 = types.InlineKeyboardButton(f"-100", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) - 100}")
+        button_minus1 = types.InlineKeyboardButton(f"-1",
+                                                   callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) - 1}")
+        button_minus10 = types.InlineKeyboardButton(f"-10",
+                                                    callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) - 10}")
+        button_minus100 = types.InlineKeyboardButton(f"-100",
+                                                     callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{int(price_trip) - 100}")
 
         button_price = types.InlineKeyboardButton(f"{price_trip}", callback_data=f"1")
 
-        bottons.add(button_minus100, button_minus10, button_minus1, button_price, button_plus1, button_plus10, button_plus100)
+        bottons.add(button_minus100, button_minus10, button_minus1, button_price, button_plus1, button_plus10,
+                    button_plus100)
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
+        ok = types.InlineKeyboardButton(f"Готово",
+                                        callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
         button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}_{end_city}")
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -722,7 +819,8 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
     elif step == 5:
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}_")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+                                                         callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}_")
         bottons.add(button_back_to_menu)
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Подвезу НАПИШИ ОПИСАНИЕ",
@@ -733,8 +831,10 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
     elif step == 6:
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        ok = types.InlineKeyboardButton(f"Разместить", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}___")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
+        ok = types.InlineKeyboardButton(f"Разместить",
+                                        callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}___")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+                                                         callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -745,20 +845,55 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
                                    f"Куда: {get_name_by_name2(int(end_city))}\n\n"
                                    f"Дата: {date_trip.replace('=', '.')}\n"
                                    f"Время: {time_trip.replace('=', ':')}\n\n"
+                                   f"Цена <strong>{price_trip}</strong>\n"
                                    f"Описание:\n{read_flag(message.chat.id)}",
-                              reply_markup=bottons)
+                              reply_markup=bottons, parse_mode="html")
 
     elif step == 7:
-        bot.send_message(chat_id=-1002201873715,
-                         text=f"Подвезу\n\n"
-                              f"Откуда: {get_name_by_name2(int(from_city))}\n"
-                              f"Куда: {get_name_by_name2(int(end_city))}\n\n"
-                              f"Дата: {date_trip.replace('=', '.')}\n"
-                              f"Время: {time_trip.replace('=', ':')}\n\n"
-                              f"Описание:\n{read_flag(message.chat.id)}\n\n"
-                              f"Автор: @{message.chat.username}\n"
-                              "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль водителя</a>",
-                         parse_mode="html")
+        admins_list = []
+        for admin_id in admins:
+            bottons = types.InlineKeyboardMarkup(row_width=2)
+
+            button_admin_yes = types.InlineKeyboardButton(f"place", callback_data=f"q")
+            button_admin_no = types.InlineKeyboardButton(f"place", callback_data=f"q")
+            bottons.add(button_admin_yes, button_admin_no)
+
+            admin_message_id = bot.send_message(admin_id, text=f"Подвезу\n\n"
+                                                               f"Откуда: {get_name_by_name2(int(from_city))}\n"
+                                                               f"Куда: {get_name_by_name2(int(end_city))}\n\n"
+                                                               f"Дата: {date_trip.replace('=', '.')}\n"
+                                                               f"Время: {time_trip.replace('=', ':')}\n\n"
+                                                               f"Описание:\n{read_flag(message.chat.id)}\n\n"
+                                                               f"Цена <strong>{price_trip}</strong>\n"
+                                                               f"Автор: @{message.chat.username}\n"
+                                                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                                parse_mode="html", reply_markup=bottons).message_id
+
+            admins_list.append([admin_id, admin_message_id])
+
+        unic_trip_id = active_trip(user_id=message.chat.id, from_city=get_name_by_name2(int(from_city)),
+                                   end_city=get_name_by_name2(int(end_city)),
+                                   date_trip=date_trip, time_trip=time_trip, price_trip=price_trip,
+                                   description_trip=read_flag(message.chat.id),
+                                   list_people_id=[], admins_list=admins_list)
+
+        for i in admins_list:
+            bottons = types.InlineKeyboardMarkup(row_width=2)
+
+            button_admin_yes = types.InlineKeyboardButton(f"yes", callback_data=f"button_admin_yes_{unic_trip_id}")
+            button_admin_no = types.InlineKeyboardButton(f"no", callback_data=f"button_admin_no_{unic_trip_id}")
+            bottons.add(button_admin_yes, button_admin_no)
+
+            bot.edit_message_text(chat_id=i[0], message_id=i[1], text=f"Подвезу\n\n"
+                                                                      f"Откуда: {get_name_by_name2(int(from_city))}\n"
+                                                                      f"Куда: {get_name_by_name2(int(end_city))}\n\n"
+                                                                      f"Дата: {date_trip.replace('=', '.')}\n"
+                                                                      f"Время: {time_trip.replace('=', ':')}\n\n"
+                                                                      f"Описание:\n{read_flag(message.chat.id)}\n\n"
+                                                                      f"Цена <strong>{price_trip}</strong>\n"
+                                                                      f"Автор: @{message.chat.username}\n"
+                                                                      "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                  parse_mode="html", reply_markup=bottons)
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
@@ -766,7 +901,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                              text=f"Размещено",
+                              text=f"Отправлено на проверку",
                               reply_markup=bottons)
 
 
@@ -787,6 +922,19 @@ def profile_interface(message, message_id):
                           reply_markup=bottons)
 
 
+
+def trip_interface(message, message_id):
+    bottons = types.InlineKeyboardMarkup(row_width=2)
+
+    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_back_to_trips_interface")
+
+
+    bottons.add(button_back_to_trips_interface)
+
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                          text=f"Профиль меню",
+                          reply_markup=bottons)
+
 # ============================== обработка данных ==============================
 @bot.message_handler(content_types=['text'])
 def message_to_bot(message):
@@ -795,10 +943,13 @@ def message_to_bot(message):
     if user_flag == 'Descriptionn':
         bottons = types.InlineKeyboardMarkup(row_width=7)
         fl = read_flag(message.chat.id)
-        from_city, end_city, date_trip, time_trip, price_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], fl.split("_")[4], fl.split("_")[6]
+        from_city, end_city, date_trip, time_trip, price_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], \
+            fl.split("_")[4], fl.split("_")[6]
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}__")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
+        ok = types.InlineKeyboardButton(f"Готово",
+                                        callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}__")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+                                                         callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -813,10 +964,13 @@ def message_to_bot(message):
     elif user_flag == 'Descriptionf':
         bottons = types.InlineKeyboardMarkup(row_width=7)
         fl = read_flag(message.chat.id)
-        from_city, end_city, date_trip, time_trip, price_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], fl.split("_")[4], fl.split("_")[6]
+        from_city, end_city, date_trip, time_trip, price_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], \
+            fl.split("_")[4], fl.split("_")[6]
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}__")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
+        ok = types.InlineKeyboardButton(f"Готово",
+                                        callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}__")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+                                                         callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -853,17 +1007,23 @@ def callback_inline(call):
             elif len(call.data.split('_')[1:]) == 2:
                 new_trip_interface(call.message, message_id, 3, call.data.split('_')[1], call.data.split('_')[2])
             elif len(call.data.split('_')[1:]) == 4:
-                new_trip_interface(call.message, message_id, 3, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4])
+                new_trip_interface(call.message, message_id, 3, call.data.split('_')[1], call.data.split('_')[2],
+                                   call.data.split('_')[3], call.data.split('_')[4])
             elif len(call.data.split('_')[1:]) == 5:
-                new_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4])
+                new_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2],
+                                   call.data.split('_')[3], call.data.split('_')[4])
             elif len(call.data.split('_')[1:]) == 6:
-                new_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                new_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2],
+                                   call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
             elif len(call.data.split('_')[1:]) == 7:
-                new_trip_interface(call.message, message_id, 5, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                new_trip_interface(call.message, message_id, 5, call.data.split('_')[1], call.data.split('_')[2],
+                                   call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
             elif len(call.data.split('_')[1:]) == 8:
-                new_trip_interface(call.message, message_id, 6, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                new_trip_interface(call.message, message_id, 6, call.data.split('_')[1], call.data.split('_')[2],
+                                   call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
             elif len(call.data.split('_')[1:]) == 9:
-                new_trip_interface(call.message, message_id, 7, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                new_trip_interface(call.message, message_id, 7, call.data.split('_')[1], call.data.split('_')[2],
+                                   call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
 
         elif call.data.split('_')[0] == 'f':
             if len(call.data.split('_')[1:]) == 1:
@@ -871,17 +1031,87 @@ def callback_inline(call):
             elif len(call.data.split('_')[1:]) == 2:
                 find_trip_interface(call.message, message_id, 3, call.data.split('_')[1], call.data.split('_')[2])
             elif len(call.data.split('_')[1:]) == 4:
-                find_trip_interface(call.message, message_id, 3, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4])
+                find_trip_interface(call.message, message_id, 3, call.data.split('_')[1], call.data.split('_')[2],
+                                    call.data.split('_')[3], call.data.split('_')[4])
             elif len(call.data.split('_')[1:]) == 5:
-                find_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4])
+                find_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2],
+                                    call.data.split('_')[3], call.data.split('_')[4])
             elif len(call.data.split('_')[1:]) == 6:
-                find_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                find_trip_interface(call.message, message_id, 4, call.data.split('_')[1], call.data.split('_')[2],
+                                    call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
             elif len(call.data.split('_')[1:]) == 7:
-                find_trip_interface(call.message, message_id, 5, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                find_trip_interface(call.message, message_id, 5, call.data.split('_')[1], call.data.split('_')[2],
+                                    call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
             elif len(call.data.split('_')[1:]) == 8:
-                find_trip_interface(call.message, message_id, 6, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                find_trip_interface(call.message, message_id, 6, call.data.split('_')[1], call.data.split('_')[2],
+                                    call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
             elif len(call.data.split('_')[1:]) == 9:
-                find_trip_interface(call.message, message_id, 7, call.data.split('_')[1], call.data.split('_')[2], call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+                find_trip_interface(call.message, message_id, 7, call.data.split('_')[1], call.data.split('_')[2],
+                                    call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
+
+        elif call.data.split('_')[0] == 'button' and call.data.split('_')[1] == 'admin' and call.data.split('_')[
+            2] == 'yes':
+            active_trip_data = active_trip(unic_trip_id=int(call.data.split('_')[3]))[-1]
+
+            admins_list = active_trip_data['admins_list']
+
+            for i in eval(admins_list):
+                bot.delete_message(i[0], i[1])
+
+            # print(active_trip_data, type(active_trip_data))
+
+
+            # message_id = bot.send_message(int(active_trip_data['user_id']), text=f"Обьявление одобрено", parse_mode="html").message_id
+
+            message_id_ = bot.send_message(-1002201873715, text=f"Подвезу\n\n"
+                                                               f"Откуда: {active_trip_data['from_city']}\n"
+                                                               f"Куда: {active_trip_data['end_city']}\n\n"
+                                                               f"Дата: {active_trip_data['date_trip'].replace('=', '.')}\n"
+                                                               f"Время: {active_trip_data['time_trip'].replace('=', ':')}\n\n"
+                                                               f"Описание:\n{active_trip_data['description_trip']}\n\n"
+                                                               f"Цена <strong>{active_trip_data['price_trip']}</strong>\n"
+                                                               f"Автор: @{get_user_info(active_trip_data['user_id'])['alies']}\n"
+                                                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                          parse_mode="html").message_id
+
+            active_trip(unic_trip_id=int(call.data.split('_')[3]), message_id=message_id_, is_verified=True, admins_list=[])
+
+
+
+            # write_for_del_mes(int(active_trip_data['user_id']), message_id)
+
+        elif call.data.split('_')[0] == 'button' and call.data.split('_')[1] == 'admin' and call.data.split('_')[
+            2] == 'no':
+
+
+
+            admins_list = active_trip(unic_trip_id=int(call.data.split('_')[3]))[-1]['admins_list']
+            for i in eval(admins_list):
+                # print(i)
+                # pass
+                bot.delete_message(i[0], i[1])
+            # message_id = bot.send_message(int(active_trip_data['user_id']), text=f"Обьявление не одобрено", parse_mode="html").message_id
+
+            del_active_trip(int(call.data.split('_')[3]))
+
+            # write_for_del_mes(int(active_trip_data['user_id']), message_id)
+
+        elif call.data == 'button_trips':
+            trips_interface(call.message, message_id, 0)
+
+        elif str(call.data).split("_")[0] == "left":
+            try:
+                trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[1]))
+            except:
+                pass
+
+        elif str(call.data).split("_")[0] == "right":
+            try:
+                trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[1]))
+            except:
+                pass
+
+        # elif call.data.split("_")[0] == "trip":
 
 
 if __name__ == '__main__':
