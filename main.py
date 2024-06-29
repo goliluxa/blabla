@@ -272,10 +272,13 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
             return
 
 
-def archived_trip(df, unic_trip_id):
+def archived_trip(df=None, unic_trip_id=None):
+    df_archived = pd.read_csv('archived_trips.csv')
+
+    if df is None and unic_trip_id is None:
+        return df_archived.to_dict('records')
     # Загружаем данные из CSV файлов
     df_active = df
-    df_archived = pd.read_csv('archived_trips.csv')
 
     # Найти индекс строки с заданным unic_trip_id в df_active
     index_to_move = df_active.index[df_active['unic_trip_id'] == unic_trip_id].tolist()
@@ -292,6 +295,7 @@ def archived_trip(df, unic_trip_id):
     # Сохраняем изменения в CSV файлы
     df_archived.to_csv('archived_trips.csv', index=False)
     return df_active
+
 
 def del_active_trip(df, unic_trip_id):
     # Step 1: Read the CSV file into a DataFrame
@@ -1141,12 +1145,12 @@ def my_activ_trips_interface(message, message_id, page=0):
             callback_data=f"my_trip_{i['unic_trip_id']}"))
     if len(split_list_of_active_trips) > 1:
         if page == 0:
-            right = types.InlineKeyboardButton(f"▶️", callback_data=f"my_right_{page + 1}")
+            right = types.InlineKeyboardButton(f"▶️", callback_data=f"activ_right_{page + 1}")
             bottons.add(right)
         else:
-            left = types.InlineKeyboardButton(f"◀️", callback_data=f"my_left_{page - 1}")
+            left = types.InlineKeyboardButton(f"◀️", callback_data=f"activ_left_{page - 1}")
             if page + 1 < len(split_list_of_active_trips):
-                right = types.InlineKeyboardButton(f"️▶️", callback_data=f"my_right_{page + 1}")
+                right = types.InlineKeyboardButton(f"️▶️", callback_data=f"activ_right_{page + 1}")
                 bottons.add(left, right)
             else:
                 bottons.add(left)
@@ -1159,6 +1163,48 @@ def my_activ_trips_interface(message, message_id, page=0):
                           text=f"page {page + 1}",
                           reply_markup=bottons)
 
+
+def my_history_trips_interface(message, message_id, page=0):
+    bottons = types.InlineKeyboardMarkup(row_width=2)
+
+    list_of_active_trips = list()
+
+    for i in archived_trip():
+        if i['user_id'] == message.chat.id:
+            list_of_active_trips.append(i)
+
+    split_list_of_active_trips = split_list(list_of_active_trips, 10)
+
+    for i in split_list_of_active_trips[page]:
+        emoji = ''
+        if i['trip_type'] == 'Подвезу':
+            emoji = '🚗'
+        elif i['trip_type'] == 'Уеду':
+            emoji = '🙋‍♂️'
+        elif i['trip_type'] == 'Такси':
+            emoji = '🚕'
+        bottons.add(types.InlineKeyboardButton(
+            f"{emoji} {i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
+            callback_data=f"my_trip_{i['unic_trip_id']}"))
+    if len(split_list_of_active_trips) > 1:
+        if page == 0:
+            right = types.InlineKeyboardButton(f"▶️", callback_data=f"history_right_{page + 1}")
+            bottons.add(right)
+        else:
+            left = types.InlineKeyboardButton(f"◀️", callback_data=f"history_left_{page - 1}")
+            if page + 1 < len(split_list_of_active_trips):
+                right = types.InlineKeyboardButton(f"️▶️", callback_data=f"history_right_{page + 1}")
+                bottons.add(left, right)
+            else:
+                bottons.add(left)
+
+    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile")
+
+    bottons.add(button_back_to_trips_interface)
+
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                          text=f"page {page + 1}",
+                          reply_markup=bottons)
 
 # ============================== обработка данных ==============================
 @bot.message_handler(content_types=['text'])
@@ -1340,20 +1386,33 @@ def callback_inline(call):
         elif call.data == 'button_my_activ_trips':
             my_activ_trips_interface(call.message, message_id)
 
-        elif str(call.data).split("_")[0] == "my" and str(call.data).split("_")[1] == "left":
+        elif str(call.data).split("_")[0] == "activ" and str(call.data).split("_")[1] == "left":
             try:
                 my_activ_trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[2]))
             except:
                 pass
 
-        elif str(call.data).split("_")[0] == "my" and str(call.data).split("_")[1] == "right":
+        elif str(call.data).split("_")[0] == "activ" and str(call.data).split("_")[1] == "right":
             try:
                 my_activ_trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[2]))
             except:
                 pass
 
         elif call.data == 'button_my_history_trips':
-            menu_interface(call.message, message_id)
+            my_history_trips_interface(call.message, message_id)
+
+        elif str(call.data).split("_")[0] == "history" and str(call.data).split("_")[1] == "left":
+            try:
+                my_history_trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[2]))
+            except:
+                pass
+
+        elif str(call.data).split("_")[0] == "history" and str(call.data).split("_")[1] == "right":
+            try:
+                my_history_trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[2]))
+            except:
+                pass
+
 
         elif call.data == 'button_my_data_profile':
             menu_interface(call.message, message_id)
