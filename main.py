@@ -1289,6 +1289,8 @@ def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=
                                    f"Цена <strong>{trip_data['price_trip']}</strong>\n",
                               parse_mode="html",
                               reply_markup=bottons)
+
+
 # ============================== обработка данных ==============================
 @bot.message_handler(content_types=['text'])
 def message_to_bot(message):
@@ -1524,6 +1526,7 @@ def callback_inline(call):
             df.to_csv('active_trips.csv', index=False)
 
             my_activ_trips_interface(call.message, message_id)
+
 
 if __name__ == '__main__':
     process = Process(target=analis_data)
