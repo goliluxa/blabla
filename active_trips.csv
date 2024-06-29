@@ -1,13 +1,2 @@
-user_id,unic_trip_id,message_id,from_city,end_city,date_trip,time_trip,price_trip,description_trip,list_people_id,is_verified,is_arhive,is_users_have_report,admins_list
-704665657,1,35,Чебоксары,Иннополис,21=06=2024,05=41,250,F,[],True,False,False,[]
-1215162451,2,34,Чебоксары,Иннополис,21=06=2024,05=41,250,hj,[],True,False,False,[]
-704665657,1,35,Чебоксары,Иннополис,21=06=2024,05=41,250,F,[],True,False,False,[]
-1215162451,2,34,Чебоксары,Иннополис,21=06=2024,05=41,250,hj,[],True,False,False,[]
-704665657,1,35,Чебоксары,Иннополис,21=06=2024,05=41,250,F,[],True,False,False,[]
-1215162451,2,34,Чебоксары,Иннополис,21=06=2024,05=41,250,hj,[],True,False,False,[]
-704665657,1,35,Чебоксары,Иннополис,21=06=2024,05=41,250,F,[],True,False,False,[]
-1215162451,2,34,Чебоксары,Иннополис,21=06=2024,05=41,250,hj,[],True,False,False,[]
-704665657,1,35,Чебоксары,Иннополис,21=06=2024,05=41,250,F,[],True,False,False,[]
-1215162451,2,34,Чебоксары,Иннополис,21=06=2024,05=41,250,hj,[],True,False,False,[]
-704665657,1,35,Чебоксары,Иннополис,21=06=2024,05=41,250,F,[],True,False,False,[]
-1215162451,2,34,Чебоксары,Иннополис,21=06=2024,05=41,250,hj,[],True,False,False,[]
+user_id,unic_trip_id,message_id,trip_type,from_city,end_city,date_trip,time_trip,price_trip,description_trip,list_people_id,is_verified,is_arhive,is_users_have_report,admins_list
+1215162451,1,61,Подвезу,Иннополис,Чебоксары,29=06=2024,20=18,250,456789,[],False,False,False,[]
