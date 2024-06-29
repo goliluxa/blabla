@@ -297,17 +297,34 @@ def menu_interface(message, message_id):
     button_chanel = types.InlineKeyboardButton(f"Канал с поездками", callback_data=f"button_chanel",
                                                url='https://t.me/poputi_innopolis')
     button_trips = types.InlineKeyboardButton(f"Список поездок", callback_data=f"button_trips")
-    button_find_trip = types.InlineKeyboardButton(f"Хочу уехать", callback_data=f"button_find_trip")
-    button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
-    button_taxi_trip = types.InlineKeyboardButton(f"Такси", callback_data=f"button_taxi_trip")
+    button_creat_trip = types.InlineKeyboardButton(f"Создать заявку", callback_data=f"button_creat_trip")
     button_profile = types.InlineKeyboardButton(f"Мой профиль", callback_data=f"button_profile")
 
     bottons.add(button_trips, button_chanel)
-    bottons.add(button_find_trip, button_new_trip, button_taxi_trip)
+    bottons.add(button_creat_trip)
     bottons.add(button_profile)
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                           text=f"Описание проекта",
+                          reply_markup=bottons)
+
+
+def creat_trip_interface(message, message_id):
+    bottons = types.InlineKeyboardMarkup(row_width=1)
+
+    button_find_trip = types.InlineKeyboardButton(f"Хочу уехать", callback_data=f"button_find_trip")
+    button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
+    button_taxi_trip = types.InlineKeyboardButton(f"Такси", callback_data=f"button_taxi_trip")
+
+    bottons.add(button_find_trip)
+    bottons.add(button_new_trip)
+    bottons.add(button_taxi_trip)
+
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+    bottons.add(button_back_to_menu)
+
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                          text=f"Выбор заявки",
                           reply_markup=bottons)
 
 
@@ -355,8 +372,8 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"f_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
-        bottons.add(button_back_to_menu)
+        button_creat_trip = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_creat_trip")
+        bottons.add(button_creat_trip)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Уеду ОТКУДА",
@@ -601,8 +618,8 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"n_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
-        bottons.add(button_back_to_menu)
+        button_creat_trip = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_creat_trip")
+        bottons.add(button_creat_trip)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Подвезу ОТКУДА",
@@ -846,8 +863,8 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"t_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
-        bottons.add(button_back_to_menu)
+        button_creat_trip = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_creat_trip")
+        bottons.add(button_creat_trip)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                               text=f"Такси ОТКУДА",
@@ -1161,7 +1178,10 @@ def message_to_bot(message):
 def callback_inline(call):
     message_id = call.message.message_id
     if call.message:
-        if call.data == 'button_find_trip':
+        if call.data == 'button_creat_trip':
+            creat_trip_interface(call.message, message_id)
+
+        elif call.data == 'button_find_trip':
             find_trip_interface(call.message, message_id)
 
         elif call.data == 'button_new_trip':
