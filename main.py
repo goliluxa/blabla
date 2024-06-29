@@ -134,7 +134,7 @@ def get_info_trip(trip_id):
         return trip_info
 
 
-def active_trip(user_id=None, unic_trip_id=None, message_id=None, from_city=None, end_city=None,
+def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None, from_city=None, end_city=None,
                 date_trip=None, time_trip=None, price_trip=None, description_trip=None,
                 list_people_id=None, is_verified=None, is_arhive=None, is_users_have_report=None, admins_list=[], all_trips=False):
     # Чтение данных из CSV файла
@@ -148,7 +148,7 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, from_city=None
         return df.to_dict('records')
 
     # Если указан только unic_trip_id и все остальные параметры равны None
-    elif unic_trip_id is not None and user_id is None and message_id is None and from_city is None \
+    elif unic_trip_id is not None and user_id is None and message_id is None and trip_type is None and from_city is None \
             and end_city is None and date_trip is None and time_trip is None and price_trip is None \
             and description_trip is None and list_people_id is None and is_verified is None \
             and is_arhive is None and is_users_have_report is None:
@@ -156,7 +156,7 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, from_city=None
         return result.to_dict('records')
 
         # Если указан только user_id и все остальные параметры равны None
-    elif user_id is not None and unic_trip_id is None and message_id is None and from_city is None \
+    elif user_id is not None and unic_trip_id is None and message_id is None and trip_type is None and from_city is None \
             and end_city is None and date_trip is None and time_trip is None and price_trip is None \
             and description_trip is None and list_people_id is None and is_verified is None \
             and is_arhive is None and is_users_have_report is None:
@@ -176,6 +176,7 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, from_city=None
             'user_id': user_id,
             'unic_trip_id': new_unic_trip_id,
             'message_id': message_id,
+            'trip_type': trip_type,
             'from_city': from_city,
             'end_city': end_city,
             'date_trip': date_trip,
@@ -199,6 +200,7 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, from_city=None
         if mask.any():
             df.loc[mask, 'user_id'] = user_id if user_id is not None else df.loc[mask, 'user_id']
             df.loc[mask, 'message_id'] = message_id if message_id is not None else df.loc[mask, 'message_id']
+            df.loc[mask, 'trip_type'] = message_id if message_id is not None else df.loc[mask, 'trip_type']
             df.loc[mask, 'from_city'] = from_city if from_city is not None else df.loc[mask, 'from_city']
             df.loc[mask, 'end_city'] = end_city if end_city is not None else df.loc[mask, 'end_city']
             df.loc[mask, 'date_trip'] = date_trip if date_trip is not None else df.loc[mask, 'date_trip']
@@ -572,7 +574,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
                                                             "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
                                        parse_mode="html").message_id
 
-        active_trip(user_id=message.chat.id, from_city=get_name_by_name2(int(from_city)),
+        active_trip(user_id=message.chat.id, trip_type="Уеду", from_city=get_name_by_name2(int(from_city)),
                     end_city=get_name_by_name2(int(end_city)),
                     date_trip=date_trip, time_trip=time_trip, price_trip=price_trip,
                     description_trip=read_flag(message.chat.id),
@@ -818,7 +820,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
                                                             "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
                                        parse_mode="html").message_id
 
-        active_trip(user_id=message.chat.id, from_city=get_name_by_name2(int(from_city)),
+        active_trip(user_id=message.chat.id, trip_type="Подвезу", from_city=get_name_by_name2(int(from_city)),
                     end_city=get_name_by_name2(int(end_city)),
                     date_trip=date_trip, time_trip=time_trip, price_trip=price_trip,
                     description_trip=read_flag(message.chat.id),
