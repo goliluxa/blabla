@@ -853,17 +853,40 @@ def profile_interface(message, message_id):
                           reply_markup=bottons)
 
 
-
-def trip_interface(message, message_id):
+def my_activ_trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_back_to_trips_interface")
+    list_of_active_trips = list()
 
+    for i in active_trip(all_trips=True):
+        if i['user_id'] == message.chat.id:
+            list_of_active_trips.append(i)
+
+    split_list_of_active_trips = split_list(list_of_active_trips, 10)
+
+    for i in split_list_of_active_trips[page]:
+        bottons.add(types.InlineKeyboardButton(
+            f"{i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
+            callback_data=f"my_trip_{i['unic_trip_id']}"))
+    if len(split_list_of_active_trips) > 1:
+        if page == 0:
+            right = types.InlineKeyboardButton(f"▶️", callback_data=f"my_right_{page + 1}")
+            bottons.add(right)
+        else:
+            left = types.InlineKeyboardButton(f"◀️", callback_data=f"my_left_{page - 1}")
+            if page + 1 < len(split_list_of_active_trips):
+                right = types.InlineKeyboardButton(f"️▶️", callback_data=f"my_right_{page + 1}")
+                bottons.add(left, right)
+            else:
+                bottons.add(left)
+
+
+    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile")
 
     bottons.add(button_back_to_trips_interface)
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                          text=f"Профиль меню",
+                          text=f"page {page + 1}",
                           reply_markup=bottons)
 
 # ============================== обработка данных ==============================
@@ -980,53 +1003,6 @@ def callback_inline(call):
                 find_trip_interface(call.message, message_id, 7, call.data.split('_')[1], call.data.split('_')[2],
                                     call.data.split('_')[3], call.data.split('_')[4], call.data.split('_')[6])
 
-        elif call.data.split('_')[0] == 'button' and call.data.split('_')[1] == 'admin' and call.data.split('_')[
-            2] == 'yes':
-            active_trip_data = active_trip(unic_trip_id=int(call.data.split('_')[3]))[-1]
-
-            admins_list = active_trip_data['admins_list']
-
-            for i in eval(admins_list):
-                bot.delete_message(i[0], i[1])
-
-            # print(active_trip_data, type(active_trip_data))
-
-
-            # message_id = bot.send_message(int(active_trip_data['user_id']), text=f"Обьявление одобрено", parse_mode="html").message_id
-
-            message_id_ = bot.send_message(-1002201873715, text=f"Подвезу\n\n"
-                                                               f"Откуда: {active_trip_data['from_city']}\n"
-                                                               f"Куда: {active_trip_data['end_city']}\n\n"
-                                                               f"Дата: {active_trip_data['date_trip'].replace('=', '.')}\n"
-                                                               f"Время: {active_trip_data['time_trip'].replace('=', ':')}\n\n"
-                                                               f"Описание:\n{active_trip_data['description_trip']}\n\n"
-                                                               f"Цена <strong>{active_trip_data['price_trip']}</strong>\n"
-                                                               f"Автор: @{get_user_info(active_trip_data['user_id'])['alies']}\n"
-                                                               "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
-                                          parse_mode="html").message_id
-
-            active_trip(unic_trip_id=int(call.data.split('_')[3]), message_id=message_id_, is_verified=True, admins_list=[])
-
-
-
-            # write_for_del_mes(int(active_trip_data['user_id']), message_id)
-
-        elif call.data.split('_')[0] == 'button' and call.data.split('_')[1] == 'admin' and call.data.split('_')[
-            2] == 'no':
-
-
-
-            admins_list = active_trip(unic_trip_id=int(call.data.split('_')[3]))[-1]['admins_list']
-            for i in eval(admins_list):
-                # print(i)
-                # pass
-                bot.delete_message(i[0], i[1])
-            # message_id = bot.send_message(int(active_trip_data['user_id']), text=f"Обьявление не одобрено", parse_mode="html").message_id
-
-            del_active_trip(int(call.data.split('_')[3]))
-
-            # write_for_del_mes(int(active_trip_data['user_id']), message_id)
-
         elif call.data == 'button_trips':
             trips_interface(call.message, message_id, 0)
 
@@ -1042,7 +1018,26 @@ def callback_inline(call):
             except:
                 pass
 
-        # elif call.data.split("_")[0] == "trip":
+        elif call.data == 'button_my_activ_trips':
+            my_activ_trips_interface(call.message, message_id)
+
+        elif str(call.data).split("_")[0] == "my" and str(call.data).split("_")[1] == "left":
+            try:
+                my_activ_trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[2]))
+            except:
+                pass
+
+        elif str(call.data).split("_")[0] == "my" and str(call.data).split("_")[1] == "right":
+            try:
+                my_activ_trips_interface(call.message, call.message.message_id, int(str(call.data).split("_")[2]))
+            except:
+                pass
+
+        elif call.data == 'button_my_history_trips':
+            menu_interface(call.message, message_id)
+
+        elif call.data == 'button_my_data_profile':
+            menu_interface(call.message, message_id)
 
 
 if __name__ == '__main__':
