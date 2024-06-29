@@ -12,6 +12,7 @@ bot = telebot.TeleBot(token)
 
 
 # -1002201873715
+
 def analis_data():
     while True:
         # print("Scan csv...")
@@ -388,7 +389,7 @@ def go(message):
 def menu_interface(message, message_id):
     bottons = types.InlineKeyboardMarkup(row_width=3)
 
-    button_chanel = types.InlineKeyboardButton(f"Канал с поездками", callback_data=f"button_chanel",
+    button_chanel = types.InlineKeyboardButton(f"Канал с поездками2", callback_data=f"button_chanel",
                                                url='https://t.me/poputi_innopolis')
     button_trips = types.InlineKeyboardButton(f"Список поездок", callback_data=f"button_trips")
     button_creat_trip = types.InlineKeyboardButton(f"Создать заявку", callback_data=f"button_creat_trip")
