@@ -302,6 +302,16 @@ def archived_trip(df=None, unic_trip_id=None, user_id=None):
     # Получаем строку для перемещения
     trip_to_move = df_active.loc[index_to_move[0]]
 
+    new_unic_trip_id = 1
+    try:
+        max_unic_trip_id = len(df_archived['unic_trip_id'])
+        new_unic_trip_id = max_unic_trip_id + 1
+    except:
+        new_unic_trip_id = 1
+        
+    trip_to_move = trip_to_move.copy()
+    trip_to_move['unic_trip_id'] = new_unic_trip_id
+
     # Удаляем строку из df_active
     df_active = del_active_trip(df_active, unic_trip_id=unic_trip_id)
 
@@ -389,7 +399,7 @@ def go(message):
 def menu_interface(message, message_id):
     bottons = types.InlineKeyboardMarkup(row_width=3)
 
-    button_chanel = types.InlineKeyboardButton(f"Канал с поездками2", callback_data=f"button_chanel",
+    button_chanel = types.InlineKeyboardButton(f"Канал с поездками", callback_data=f"button_chanel",
                                                url='https://t.me/poputi_innopolis')
     button_trips = types.InlineKeyboardButton(f"Список поездок", callback_data=f"button_trips")
     button_creat_trip = types.InlineKeyboardButton(f"Создать заявку", callback_data=f"button_creat_trip")
@@ -1233,44 +1243,52 @@ def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=
 
         bottons.add(button_del_my_trip)
         bottons.add(button_trips)
-
-        emoji = ''
-        if trip_data['trip_type'] == 'Подвезу':
-            emoji = '🚗'
-        elif trip_data['trip_type'] == 'Уеду':
-            emoji = '🙋‍♂️'
-        elif trip_data['trip_type'] == 'Такси':
-            emoji = '🚕'
-
-        if trip_data['trip_type'] == 'Такси':
-            bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                                  text=f"{emoji} {trip_data['trip_type']} {emoji}\n\n"
-                                       f"Откуда: {trip_data['from_city']}\n"
-                                       f"Куда: {trip_data['end_city']}\n\n"
-                                       f"Дата: {trip_data['date_trip'].replace('=', '.')}\n"
-                                       f"Время: {trip_data['time_trip'].replace('=', ':')}\n\n"
-                                       f"Описание:\n{trip_data['description_trip']}\n\n",
-                                  parse_mode="html",
-                                  reply_markup=bottons)
-        else:
-            bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                                  text=f"{emoji} {trip_data['trip_type']} {emoji}\n\n"
-                                                                f"Откуда: {trip_data['from_city']}\n"
-                                                                f"Куда: {trip_data['end_city']}\n\n"
-                                                                f"Дата: {trip_data['date_trip'].replace('=', '.')}\n"
-                                                                f"Время: {trip_data['time_trip'].replace('=', ':')}\n\n"
-                                                                f"Описание:\n{trip_data['description_trip']}\n\n"
-                                                                f"Цена <strong>{trip_data['price_trip']}</strong>\n",
-                                           parse_mode="html",
-                              reply_markup=bottons)
-
-
     else:
         if history:
-            trip_data = archived_trip(unic_trip_id=trip_id, user_id=message.chat.id)
+            trip_data = archived_trip(unic_trip_id=trip_id, user_id=message.chat.id)[0]
+            # print(trip_data)
+            bottons = types.InlineKeyboardMarkup(row_width=2)
 
+            button_trips = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_my_history_trips")
+
+            bottons.add(button_trips)
         else:
-            trip_data = active_trip(unic_trip_id=trip_id)
+            trip_data = active_trip(unic_trip_id=trip_id)[0]
+            bottons = types.InlineKeyboardMarkup(row_width=2)
+
+            button_trips = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_trips")
+
+            bottons.add(button_trips)
+
+    emoji = ''
+    if trip_data['trip_type'] == 'Подвезу':
+        emoji = '🚗'
+    elif trip_data['trip_type'] == 'Уеду':
+        emoji = '🙋‍♂️'
+    elif trip_data['trip_type'] == 'Такси':
+        emoji = '🚕'
+
+    if trip_data['trip_type'] == 'Такси':
+        bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                              text=f"{emoji} {trip_data['trip_type']} {emoji}\n\n"
+                                   f"Откуда: {trip_data['from_city']}\n"
+                                   f"Куда: {trip_data['end_city']}\n\n"
+                                   f"Дата: {trip_data['date_trip'].replace('=', '.')}\n"
+                                   f"Время: {trip_data['time_trip'].replace('=', ':')}\n\n"
+                                   f"Описание:\n{trip_data['description_trip']}\n\n",
+                              parse_mode="html",
+                              reply_markup=bottons)
+    else:
+        bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                              text=f"{emoji} {trip_data['trip_type']} {emoji}\n\n"
+                                   f"Откуда: {trip_data['from_city']}\n"
+                                   f"Куда: {trip_data['end_city']}\n\n"
+                                   f"Дата: {trip_data['date_trip'].replace('=', '.')}\n"
+                                   f"Время: {trip_data['time_trip'].replace('=', ':')}\n\n"
+                                   f"Описание:\n{trip_data['description_trip']}\n\n"
+                                   f"Цена <strong>{trip_data['price_trip']}</strong>\n",
+                              parse_mode="html",
+                              reply_markup=bottons)
 # ============================== обработка данных ==============================
 @bot.message_handler(content_types=['text'])
 def message_to_bot(message):
@@ -1486,14 +1504,14 @@ def callback_inline(call):
             trip_info_interface(call.message, message_id, int(str(call.data).split("_")[1]))
 
         elif str(call.data).split("_")[0] == "history" and str(call.data).split("_")[1] == "trip":
-            trip_info_interface(call.message, message_id, int(str(call.data).split("_")[2]))
+            trip_info_interface(call.message, message_id, int(str(call.data).split("_")[2]), history=True)
 
         elif str(call.data).split("_")[0] == "my" and str(call.data).split("_")[1] == "activ" and str(call.data).split("_")[2] == "trip":
             trip_info_interface(call.message, message_id, int(str(call.data).split("_")[3]), can_edit=True)
 
         elif str(call.data).split("_")[:-1] == 'button_del_my_trip'.split("_"):
             trip_data = active_trip(unic_trip_id=int(str(call.data).split("_")[-1]))[0]
-            print(trip_data)
+            # print(trip_data)
             try:
                 bot.delete_message(-1002201873715, trip_data['message_id'])
             except Exception as Ex:
