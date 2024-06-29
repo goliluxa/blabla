@@ -399,18 +399,18 @@ def go(message):
 def menu_interface(message, message_id):
     bottons = types.InlineKeyboardMarkup(row_width=3)
 
-    button_chanel = types.InlineKeyboardButton(f"Канал с поездками", callback_data=f"button_chanel",
+    button_chanel = types.InlineKeyboardButton(f"Канал с поездками 📣", callback_data=f"button_chanel",
                                                url='https://t.me/poputi_innopolis')
-    button_trips = types.InlineKeyboardButton(f"Список поездок", callback_data=f"button_trips")
-    button_creat_trip = types.InlineKeyboardButton(f"Создать заявку", callback_data=f"button_creat_trip")
-    button_profile = types.InlineKeyboardButton(f"Мой профиль", callback_data=f"button_profile")
+    button_trips = types.InlineKeyboardButton(f"Список поездок 📋", callback_data=f"button_trips")
+    button_creat_trip = types.InlineKeyboardButton(f"Создать заявку 📝", callback_data=f"button_creat_trip")
+    button_profile = types.InlineKeyboardButton(f"Мой профиль 👤", callback_data=f"button_profile")
 
     bottons.add(button_trips, button_chanel)
     bottons.add(button_creat_trip)
     bottons.add(button_profile)
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                          text=f"Описание проекта",
+                          text=f"Меню 🗂️",
                           reply_markup=bottons)
 
 
