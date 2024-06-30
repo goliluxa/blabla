@@ -454,15 +454,15 @@ def creat_trip_interface(message, message_id):
     else:
         bottons = types.InlineKeyboardMarkup(row_width=1)
 
-        button_find_trip = types.InlineKeyboardButton(f"Хочу уехать", callback_data=f"button_find_trip")
-        button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
-        button_taxi_trip = types.InlineKeyboardButton(f"Такси", callback_data=f"button_taxi_trip")
+        button_find_trip = types.InlineKeyboardButton(f"Хочу уехать🙋‍♂️", callback_data=f"button_find_trip")
+        button_new_trip = types.InlineKeyboardButton(f"Могу подвести🚗", callback_data=f"button_new_trip")
+        button_taxi_trip = types.InlineKeyboardButton(f"Такси🚕", callback_data=f"button_taxi_trip")
 
         bottons.add(button_find_trip)
         bottons.add(button_new_trip)
         bottons.add(button_taxi_trip)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -474,7 +474,7 @@ def trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
     # filters = types.InlineKeyboardButton(f"filters", callback_data=f"filters")
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
 
     # bottons.add(filters)
 
@@ -521,7 +521,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"f_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_creat_trip = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_creat_trip")
+        button_creat_trip = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_creat_trip")
         bottons.add(button_creat_trip)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -536,7 +536,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"f_{from_city}_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_new_trip")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_new_trip")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -635,8 +635,8 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         bottons.add(button_H, button_wpoint, button_M)
         bottons.add(button_down_H, button_space, button_down_M)
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"f_{from_city}")
+        ok = types.InlineKeyboardButton(f"Готово✅", callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"f_{from_city}")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -670,9 +670,9 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         bottons.add(button_minus100, button_minus10, button_minus1, button_price, button_plus1, button_plus10,
                     button_plus100)
 
-        ok = types.InlineKeyboardButton(f"Готово",
+        ok = types.InlineKeyboardButton(f"Готово✅",
                                         callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"f_{from_city}_{end_city}")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"f_{from_city}_{end_city}")
         bottons.add(ok)
         bottons.add(button_back_to_menu)
 
@@ -683,7 +683,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
     elif step == 5:
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}_")
         bottons.add(button_back_to_menu)
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -695,9 +695,9 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
     elif step == 6:
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        ok = types.InlineKeyboardButton(f"Разместить",
+        ok = types.InlineKeyboardButton(f"Разместить✅",
                                         callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}___")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
@@ -722,11 +722,11 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                              text=f"Отправлено",
+                              text=f"Отправлено✅",
                               reply_markup=bottons)
 
 
@@ -740,7 +740,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"n_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_creat_trip = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_creat_trip")
+        button_creat_trip = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_creat_trip")
         bottons.add(button_creat_trip)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -755,7 +755,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"n_{from_city}_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_new_trip")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_new_trip")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -854,8 +854,8 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         bottons.add(button_H, button_wpoint, button_M)
         bottons.add(button_down_H, button_space, button_down_M)
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}")
+        ok = types.InlineKeyboardButton(f"Готово✅", callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"n_{from_city}")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -889,9 +889,9 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         bottons.add(button_minus100, button_minus10, button_minus1, button_price, button_plus1, button_plus10,
                     button_plus100)
 
-        ok = types.InlineKeyboardButton(f"Готово",
+        ok = types.InlineKeyboardButton(f"Готово✅",
                                         callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"n_{from_city}_{end_city}")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"n_{from_city}_{end_city}")
         bottons.add(ok)
         bottons.add(button_back_to_menu)
 
@@ -902,7 +902,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
     elif step == 5:
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}_")
         bottons.add(button_back_to_menu)
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -916,7 +916,7 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
 
         ok = types.InlineKeyboardButton(f"Разместить",
                                         callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}___")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
@@ -941,11 +941,11 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                              text=f"Отправлено",
+                              text=f"Отправлено✅",
                               reply_markup=bottons)
 
 
@@ -958,7 +958,7 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"t_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_creat_trip = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_creat_trip")
+        button_creat_trip = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_creat_trip")
         bottons.add(button_creat_trip)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -973,7 +973,7 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
             button = types.InlineKeyboardButton(f"{i}", callback_data=f"t_{from_city}_{get_name2_by_name(i)}")
             bottons.add(button)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_taxi_trip")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_taxi_trip")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -1072,8 +1072,8 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         bottons.add(button_H, button_wpoint, button_M)
         bottons.add(button_down_H, button_space, button_down_M)
 
-        ok = types.InlineKeyboardButton(f"Готово", callback_data=f"t_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"t_{from_city}")
+        ok = types.InlineKeyboardButton(f"Готово✅", callback_data=f"t_{from_city}_{end_city}_{date_trip}_{time_trip}_ok")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"t_{from_city}")
 
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -1088,7 +1088,7 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
     elif step == 5:
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"t_{from_city}_{end_city}_{date_trip}_")
         bottons.add(button_back_to_menu)
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -1100,9 +1100,9 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
     elif step == 6:
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        ok = types.InlineKeyboardButton(f"Разместить",
+        ok = types.InlineKeyboardButton(f"Разместить✅",
                                         callback_data=f"t_{from_city}_{end_city}_{date_trip}_{time_trip}____")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"t_{from_city}_{end_city}_{date_trip}_{time_trip}__")
 
         bottons.add(ok)
@@ -1126,11 +1126,11 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                              text=f"Отправлено",
+                              text=f"Отправлено✅",
                               reply_markup=bottons)
 
 
@@ -1193,7 +1193,7 @@ def my_activ_trips_interface(message, message_id, page=0):
             else:
                 bottons.add(left)
 
-    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile")
+    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_profile")
 
     bottons.add(button_back_to_trips_interface)
 
@@ -1236,7 +1236,7 @@ def my_history_trips_interface(message, message_id, page=0):
             else:
                 bottons.add(left)
 
-    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile")
+    button_back_to_trips_interface = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_profile")
 
     bottons.add(button_back_to_trips_interface)
 
@@ -1250,7 +1250,7 @@ def data_profile_interface(message, user_id):
 
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile_back")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_profile_back")
 
     bottons.add(button_back_to_menu)
 
@@ -1276,10 +1276,10 @@ def my_data_profile_interface(message, message_id):
 
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-    button_edit_profile_name = types.InlineKeyboardButton(f"Изменить Имя", callback_data=f"button_edit_profile_name")
-    button_edit_profile_phone = types.InlineKeyboardButton(f"Изменить Номер", callback_data=f"button_edit_profile_phone")
-    button_edit_profile_photo = types.InlineKeyboardButton(f"Изменить Фото", callback_data=f"button_edit_profile_photo")
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile_back")
+    button_edit_profile_name = types.InlineKeyboardButton(f"Изменить Имя✍️", callback_data=f"button_edit_profile_name")
+    button_edit_profile_phone = types.InlineKeyboardButton(f"Изменить Номер☎️", callback_data=f"button_edit_profile_phone")
+    button_edit_profile_photo = types.InlineKeyboardButton(f"Изменить Фото📸", callback_data=f"button_edit_profile_photo")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_profile_back")
 
     bottons.add(button_edit_profile_name)
     bottons.add(button_edit_profile_phone)
@@ -1309,8 +1309,8 @@ def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=
         trip_data = active_trip(unic_trip_id=trip_id)[0]
         bottons = types.InlineKeyboardMarkup(row_width=2)
 
-        button_del_my_trip = types.InlineKeyboardButton(f"Удалить поездку", callback_data=f"button_del_my_trip_{trip_id}")
-        button_trips = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_my_activ_trips")
+        button_del_my_trip = types.InlineKeyboardButton(f"Удалить поездку❌", callback_data=f"button_del_my_trip_{trip_id}")
+        button_trips = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_my_activ_trips")
 
         bottons.add(button_del_my_trip)
         bottons.add(button_trips)
@@ -1320,14 +1320,14 @@ def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=
             # print(trip_data)
             bottons = types.InlineKeyboardMarkup(row_width=2)
 
-            button_trips = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_my_history_trips")
+            button_trips = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_my_history_trips")
 
             bottons.add(button_trips)
         else:
             trip_data = active_trip(unic_trip_id=trip_id)[0]
             bottons = types.InlineKeyboardMarkup(row_width=2)
 
-            button_trips = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_trips")
+            button_trips = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_trips")
 
             bottons.add(button_trips)
 
@@ -1377,9 +1377,9 @@ def message_to_bot(message):
         from_city, end_city, date_trip, time_trip, price_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], \
             fl.split("_")[4], fl.split("_")[6]
 
-        ok = types.InlineKeyboardButton(f"Готово",
+        ok = types.InlineKeyboardButton(f"Готово✅",
                                         callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}__")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"n_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
@@ -1398,9 +1398,9 @@ def message_to_bot(message):
         from_city, end_city, date_trip, time_trip, price_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], \
             fl.split("_")[4], fl.split("_")[6]
 
-        ok = types.InlineKeyboardButton(f"Готово",
+        ok = types.InlineKeyboardButton(f"Готово✅",
                                         callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}__")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
 
         bottons.add(ok)
@@ -1419,9 +1419,9 @@ def message_to_bot(message):
         from_city, end_city, date_trip, time_trip = fl.split("_")[1], fl.split("_")[2], fl.split("_")[3], \
             fl.split("_")[4]
 
-        ok = types.InlineKeyboardButton(f"Готово",
+        ok = types.InlineKeyboardButton(f"Готово✅",
                                         callback_data=f"t_{from_city}_{end_city}_{date_trip}_{time_trip}___")
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно",
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно⬅️",
                                                          callback_data=f"t_{from_city}_{end_city}_{date_trip}_{time_trip}__")
 
         bottons.add(ok)

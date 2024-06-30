@@ -1,1 +1,2 @@
 user_id,unic_trip_id,message_id,trip_type,from_city,end_city,date_trip,time_trip,price_trip,description_trip,list_people_id,is_verified,is_arhive,is_users_have_report,admins_list
+1862875556,1,-1,Такси,Казань,Иннополис,30=06=2024,19=41,0,dfghjkl;,[],False,False,False,[]
