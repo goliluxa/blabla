@@ -394,6 +394,7 @@ def start(message, real=True):
         real = False
     except:
         pass
+
     if real:
         user_id = message.chat.id
         del_flag(user_id)
