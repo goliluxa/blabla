@@ -438,22 +438,32 @@ def menu_interface(message, message_id):
 
 
 def creat_trip_interface(message, message_id):
-    bottons = types.InlineKeyboardMarkup(row_width=1)
+    if get_user_info(message.chat.id)['photo_id'] == -1 or get_user_info(message.chat.id)['photo_id'] == "-1" or get_user_info(message.chat.id)['name'] == 'Неизвестный' or get_user_info(message.chat.id)['phone_number'] == 'Неизвестный':
+        bottons = types.InlineKeyboardMarkup(row_width=1)
 
-    button_find_trip = types.InlineKeyboardButton(f"Хочу уехать", callback_data=f"button_find_trip")
-    button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
-    button_taxi_trip = types.InlineKeyboardButton(f"Такси", callback_data=f"button_taxi_trip")
+        button_profile = types.InlineKeyboardButton(f"Мой профиль 👤", callback_data=f"button_profile")
+        bottons.add(button_profile)
 
-    bottons.add(button_find_trip)
-    bottons.add(button_new_trip)
-    bottons.add(button_taxi_trip)
+        bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                              text=f"Сначала заполни все данные профиля",
+                              reply_markup=bottons)
+    else:
+        bottons = types.InlineKeyboardMarkup(row_width=1)
 
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
-    bottons.add(button_back_to_menu)
+        button_find_trip = types.InlineKeyboardButton(f"Хочу уехать", callback_data=f"button_find_trip")
+        button_new_trip = types.InlineKeyboardButton(f"Могу подвести", callback_data=f"button_new_trip")
+        button_taxi_trip = types.InlineKeyboardButton(f"Такси", callback_data=f"button_taxi_trip")
 
-    bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
-                          text=f"Выбор заявки",
-                          reply_markup=bottons)
+        bottons.add(button_find_trip)
+        bottons.add(button_new_trip)
+        bottons.add(button_taxi_trip)
+
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_back_to_menu")
+        bottons.add(button_back_to_menu)
+
+        bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                              text=f"Выбор заявки",
+                              reply_markup=bottons)
 
 
 def trips_interface(message, message_id, page=0):
