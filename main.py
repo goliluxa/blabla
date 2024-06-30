@@ -17,7 +17,7 @@ def analis_data():
     while True:
         # print("Scan csv...")
         # Чтение CSV-файла
-        df1 = pd.read_csv('active_trips.csv')
+        df1 = pd.read_csv('data/active_trips.csv')
 
         # Текущая дата и время
         now = datetime.now()
@@ -41,7 +41,7 @@ def analis_data():
                                                                         f"Время: {row['time_trip'].replace('=', ':')}\n\n"
                                                                         f"Описание:\n{row['description_trip']}\n\n"
                                                                         f"Автор: @{get_user_info(row['user_id'])['alies']}\n"
-                                                                        "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                                                        f"<a href='https://t.me/poputi_inno_bot?start=profile_{row['user_id']}'>Профиль автора</a>",
                                                    parse_mode="html").message_id
                 else:
                     message_id_ = bot.send_message(-1002201873715, text=f"{emoji} {row['trip_type']} {emoji}\n\n"
@@ -52,7 +52,7 @@ def analis_data():
                                                                         f"Описание:\n{row['description_trip']}\n\n"
                                                                         f"Цена <strong>{row['price_trip']}</strong>\n"
                                                                         f"Автор: @{get_user_info(row['user_id'])['alies']}\n"
-                                                                        "<a href='https://t.me/poputi_inno_bot?start=my_action'>Профиль автора</a>",
+                                                                        f"<a href='https://t.me/poputi_inno_bot?start=profile_{row['user_id']}'>Профиль автора</a>",
                                                    parse_mode="html").message_id
 
                 df1.loc[index, 'message_id'] = message_id_
@@ -72,7 +72,7 @@ def analis_data():
                 df1 = archived_trip(df1, row['unic_trip_id'])
 
         # Сохранение изменений в CSV-файл
-        df1.to_csv('active_trips.csv', index=False)
+        df1.to_csv('data/active_trips.csv', index=False)
         # Задержка на 30 секунд перед следующей проверкой
         time.sleep(3)
 
@@ -80,7 +80,7 @@ def analis_data():
 # ============================== Логи ==============================
 def write_log(user_id, username, action):
     try:
-        with open("logs.csv", mode='a', newline='', encoding='utf-8') as csv_file:
+        with open("data/logs.csv", mode='a', newline='', encoding='utf-8') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=["user_id", 'username', "action"])
             data_ = {
                 "user_id": user_id,
@@ -90,7 +90,7 @@ def write_log(user_id, username, action):
             # Записываем данные в файл
             writer.writerow(data_)
     except:
-        with open("logs.csv", mode='a', newline='', encoding='utf-8') as csv_file:
+        with open("data/logs.csv", mode='a', newline='', encoding='utf-8') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=["user_id", 'username', "action"])
             data_ = {
                 "user_id": user_id,
@@ -103,7 +103,7 @@ def write_log(user_id, username, action):
 
 def read_for_del_mes(user_id):
     try:
-        df = pd.read_csv('need_to_del_mes.csv')
+        df = pd.read_csv('data/need_to_del_mes.csv')
         flag = df[df['user_id'] == user_id]['message_id'].tolist()
         return flag
     except:
@@ -111,16 +111,16 @@ def read_for_del_mes(user_id):
 
 
 def write_for_del_mes(user_id, message_id):
-    df = pd.read_csv('need_to_del_mes.csv')
+    df = pd.read_csv('data/need_to_del_mes.csv')
     new_row = pd.DataFrame({'user_id': [user_id], 'message_id': [message_id]})
     df = pd.concat([df, new_row], ignore_index=True)
-    df.to_csv('need_to_del_mes.csv', index=False)
+    df.to_csv('data/need_to_del_mes.csv', index=False)
 
 
 def del_for_del_mes(user_id):
-    df = pd.read_csv('need_to_del_mes.csv')
+    df = pd.read_csv('data/need_to_del_mes.csv')
     df = df[df['user_id'] != user_id]
-    df.to_csv('need_to_del_mes.csv', index=False)
+    df.to_csv('data/need_to_del_mes.csv', index=False)
 
 
 def do_del_mes(user_id):
@@ -135,24 +135,38 @@ def do_del_mes(user_id):
 
 
 # ============================== Пользователь ==============================
-def add_user(user_id, name, alies):
+def add_user(user_id, alies):
     user_data = pd.DataFrame({
         "user_id": [user_id],
-        "name": [name],
-        "alies": [alies]
+        "name": ['Неизвестный'],
+        "alies": [alies],
+        'photo_id': ['-1'],
+        'phone_number': ['Неизвестный']
     })
 
-    user_data.to_csv("users_data.csv", mode='a', header=False, index=False, encoding='utf-8')
+    user_data.to_csv("data/users_data.csv", mode='a', header=False, index=False, encoding='utf-8')
 
 
 def edit_user_name(user_id, name):
-    users = pd.read_csv("users_data.csv", encoding='utf-8')
+    users = pd.read_csv("data/users_data.csv", encoding='utf-8')
     users.loc[users['user_id'] == user_id, 'name'] = name
-    users.to_csv("users_data.csv", index=False, encoding='utf-8')
+    users.to_csv("data/users_data.csv", index=False, encoding='utf-8')
+
+
+def edit_user_phone_number(user_id, phone_number):
+    users = pd.read_csv("data/users_data.csv", encoding='utf-8')
+    users.loc[users['user_id'] == user_id, 'phone_number'] = int(phone_number)
+    users.to_csv("data/users_data.csv", index=False, encoding='utf-8')
+
+
+def edit_user_photo_id(user_id, photo_id):
+    users = pd.read_csv("data/users_data.csv", encoding='utf-8')
+    users.loc[users['user_id'] == user_id, 'photo_id'] = photo_id
+    users.to_csv("data/users_data.csv", index=False, encoding='utf-8')
 
 
 def cheak_new_user(user_id):
-    df = pd.read_csv('users_data.csv')
+    df = pd.read_csv('data/users_data.csv')
     all_ids = df['user_id'].tolist()
 
     if user_id in all_ids:
@@ -162,14 +176,14 @@ def cheak_new_user(user_id):
 
 
 def get_user_info(user_id):
-    df = pd.read_csv('users_data.csv')
+    df = pd.read_csv('data/users_data.csv')
     user_info = df[df['user_id'] == user_id]
     return user_info.to_dict('records')[0]
 
 
 def read_flag(user_id):
     try:
-        df = pd.read_csv('user_input_flags.csv')
+        df = pd.read_csv('data/user_input_flags.csv')
         flag = df[df['user_id'] == user_id]['flag'].tolist()[0]
         return flag
     except:
@@ -177,21 +191,21 @@ def read_flag(user_id):
 
 
 def write_flag(user_id, flag_type):
-    df = pd.read_csv('user_input_flags.csv')
+    df = pd.read_csv('data/user_input_flags.csv')
     new_row = pd.DataFrame({'user_id': [user_id], 'flag': [flag_type]})
     df = pd.concat([df, new_row], ignore_index=True)
-    df.to_csv('user_input_flags.csv', index=False)
+    df.to_csv('data/user_input_flags.csv', index=False)
 
 
 def del_flag(user_id):
-    df = pd.read_csv('user_input_flags.csv')
+    df = pd.read_csv('data/user_input_flags.csv')
     df = df[df['user_id'] != user_id]
-    df.to_csv('user_input_flags.csv', index=False)
+    df.to_csv('data/user_input_flags.csv', index=False)
 
 
 # ============================== поездка ==============================
 def get_info_trip(trip_id):
-    df = pd.read_csv('active_trips.csv')
+    df = pd.read_csv('data/active_trips.csv')
     trip_info = df[df['trip_id'] == trip_id]
     if trip_info.empty:
         raise ValueError(f"Trip with id {trip_id} not found.")
@@ -204,11 +218,11 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
                 list_people_id=None, is_verified=None, is_arhive=None, is_users_have_report=None, admins_list=[],
                 all_trips=False):
     # Чтение данных из CSV файла
-    df = pd.read_csv('active_trips.csv')
+    df = pd.read_csv('data/active_trips.csv')
 
     # Функция для сохранения изменений в CSV файл
     def save_to_csv(dataframe):
-        dataframe.to_csv('active_trips.csv', index=False)
+        dataframe.to_csv('data/active_trips.csv', index=False)
 
     if all_trips:
         return df.to_dict('records')
@@ -286,7 +300,7 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
 
 
 def archived_trip(df=None, unic_trip_id=None, user_id=None):
-    df_archived = pd.read_csv('archived_trips.csv')
+    df_archived = pd.read_csv('data/archived_trips.csv')
 
     if df is None and unic_trip_id is None:
         return df_archived.to_dict('records')
@@ -319,7 +333,7 @@ def archived_trip(df=None, unic_trip_id=None, user_id=None):
     df_archived = pd.concat([df_archived, trip_to_move.to_frame().T], ignore_index=True)
 
     # Сохраняем изменения в CSV файлы
-    df_archived.to_csv('archived_trips.csv', index=False)
+    df_archived.to_csv('data/archived_trips.csv', index=False)
     return df_active
 
 
@@ -349,7 +363,7 @@ def split_list(input_list, chunk_size):
 
 
 def get_cities(except_city=None):
-    df = pd.read_csv('Cities.csv')
+    df = pd.read_csv('data/Cities.csv')
     data = df["name"].tolist()
     if except_city:
         data = [city for city in data if city != except_city]
@@ -357,13 +371,13 @@ def get_cities(except_city=None):
 
 
 def get_name2_by_name(name):
-    df = pd.read_csv('Cities.csv')
+    df = pd.read_csv('data/Cities.csv')
     result = df[df['name'] == name]['name2'].tolist()
     return result[0]
 
 
 def get_name_by_name2(name2):
-    df = pd.read_csv('Cities.csv')
+    df = pd.read_csv('data/Cities.csv')
     result = df[df['name2'] == name2]['name'].tolist()
     return result[0]
 
@@ -371,28 +385,32 @@ def get_name_by_name2(name2):
 # ============================== главные функции ==============================
 @bot.message_handler(commands=['start'])
 def start(message):
-    user_id = message.chat.id
-    del_flag(user_id)
-    do_del_mes(user_id=user_id)
-
-    if cheak_new_user(user_id=user_id):
-        add_user(user_id, 1, message.chat.username)
-        message_id = bot.send_message(user_id, f"Открываю").message_id
-        menu_interface(message, message_id)
-        write_for_del_mes(user_id, message_id)
-
+    if len(message.text.split()) > 1:
+        if message.text.split()[1].split("_")[0] == 'profile':
+            data_profile_interface(message, int(message.text.split()[1].split("_")[1]))
     else:
-        bot.delete_message(user_id, message.message_id)
-        message_id = bot.send_message(user_id, f"Открываю").message_id
-        menu_interface(message, message_id)
-        write_for_del_mes(user_id, message_id)
+        user_id = message.chat.id
+        del_flag(user_id)
+        do_del_mes(user_id=user_id)
+
+        if cheak_new_user(user_id=user_id):
+            add_user(user_id, message.chat.username)
+            message_id = bot.send_message(user_id, f"Открываю").message_id
+            menu_interface(message, message_id)
+            write_for_del_mes(user_id, message_id)
+
+        else:
+            bot.delete_message(user_id, message.message_id)
+            message_id = bot.send_message(user_id, f"Открываю").message_id
+            menu_interface(message, message_id)
+            write_for_del_mes(user_id, message_id)
 
 
 @bot.message_handler(commands=['go'])
 def go(message):
     bot.send_message(chat_id=-1002201873715,
                      text="текст\n"
-                          "<a href='https://t.me/poputi_inno_bot?start=my_action'>link text</a>", parse_mode="html")
+                          "<a href='https://t.me/poputi_inno_bot?start=profile_'>link text</a>", parse_mode="html")
 
 
 # ============================== интерфейсы ==============================
@@ -573,11 +591,6 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         button_down_m = types.InlineKeyboardButton(f"🔽" if m != 1 else sp,
                                                    callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'm', -1)}_{time_trip}")
 
-        button_up_y = types.InlineKeyboardButton(f"🔼",
-                                                 callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'y', 1)}_{time_trip}")
-        button_down_y = types.InlineKeyboardButton(f"🔽",
-                                                   callback_data=f"f_{from_city}_{end_city}_{add_but(date_trip, 'y', -1)}_{time_trip}")
-
         button_up_H = types.InlineKeyboardButton(f"🔼" if H != 23 else sp,
                                                  callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 1)}")
         button_down_H = types.InlineKeyboardButton(f"🔽" if H != 0 else sp,
@@ -588,19 +601,8 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
         button_down_M = types.InlineKeyboardButton(f"🔽" if M != 0 else sp,
                                                    callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -1)}")
 
-        button_plus3h = types.InlineKeyboardButton(f"⬆️ 3ч" if H != 23 else sp,
-                                                   callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 3)}")
-        button_minus3h = types.InlineKeyboardButton(f"⬇️ 3ч" if H != 0 else sp,
-                                                    callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', -3)}")
-
-        button_plus15m = types.InlineKeyboardButton(f"⬆️ 15м" if M != 59 else sp,
-                                                    callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', 15)}")
-        button_minus15m = types.InlineKeyboardButton(f"⬇️ 15м" if M != 0 else sp,
-                                                     callback_data=f"f_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -15)}")
-
         button_d = types.InlineKeyboardButton(f"{d}", callback_data=f"1")
         button_m = types.InlineKeyboardButton(f"{m}", callback_data=f"1")
-        button_y = types.InlineKeyboardButton(f"{y}", callback_data=f"1")
 
         button_H = types.InlineKeyboardButton(f"{H}", callback_data=f"1")
         button_M = types.InlineKeyboardButton(f"{M}", callback_data=f"1")
@@ -808,11 +810,6 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         button_down_m = types.InlineKeyboardButton(f"🔽" if m != 1 else sp,
                                                    callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'm', -1)}_{time_trip}")
 
-        button_up_y = types.InlineKeyboardButton(f"🔼",
-                                                 callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'y', 1)}_{time_trip}")
-        button_down_y = types.InlineKeyboardButton(f"🔽",
-                                                   callback_data=f"n_{from_city}_{end_city}_{add_but(date_trip, 'y', -1)}_{time_trip}")
-
         button_up_H = types.InlineKeyboardButton(f"🔼" if H != 23 else sp,
                                                  callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 1)}")
         button_down_H = types.InlineKeyboardButton(f"🔽" if H != 0 else sp,
@@ -823,19 +820,8 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
         button_down_M = types.InlineKeyboardButton(f"🔽" if M != 0 else sp,
                                                    callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -1)}")
 
-        button_plus3h = types.InlineKeyboardButton(f"⬆️ 3ч" if H != 23 else sp,
-                                                   callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', 3)}")
-        button_minus3h = types.InlineKeyboardButton(f"⬇️ 3ч" if H != 0 else sp,
-                                                    callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'H', -3)}")
-
-        button_plus15m = types.InlineKeyboardButton(f"⬆️ 15м" if M != 59 else sp,
-                                                    callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', 15)}")
-        button_minus15m = types.InlineKeyboardButton(f"⬇️ 15м" if M != 0 else sp,
-                                                     callback_data=f"n_{from_city}_{end_city}_{date_trip}_{add_but(time_trip, 'M', -15)}")
-
         button_d = types.InlineKeyboardButton(f"{d}", callback_data=f"1")
         button_m = types.InlineKeyboardButton(f"{m}", callback_data=f"1")
-        button_y = types.InlineKeyboardButton(f"{y}", callback_data=f"1")
 
         button_H = types.InlineKeyboardButton(f"{H}", callback_data=f"1")
         button_M = types.InlineKeyboardButton(f"{M}", callback_data=f"1")
@@ -1054,7 +1040,6 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
         button_d = types.InlineKeyboardButton(f"{d}", callback_data=f"1")
         button_m = types.InlineKeyboardButton(f"{m}", callback_data=f"1")
-        button_y = types.InlineKeyboardButton(f"{y}", callback_data=f"1")
 
         button_H = types.InlineKeyboardButton(f"{H}", callback_data=f"1")
         button_M = types.InlineKeyboardButton(f"{M}", callback_data=f"1")
@@ -1131,6 +1116,7 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
 
 def profile_interface(message, message_id):
+    do_del_mes(message.chat.id)
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
     button_my_activ_trips = types.InlineKeyboardButton(f"Активные поездки", callback_data=f"button_my_activ_trips")
@@ -1142,10 +1128,11 @@ def profile_interface(message, message_id):
     bottons.add(button_my_data_profile)
     bottons.add(button_back_to_menu)
 
-    bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+    mes_id = bot.send_message(chat_id=message.chat.id,
                           text=f"Профиль меню",
-                          reply_markup=bottons)
+                          reply_markup=bottons).message_id
 
+    write_for_del_mes(message.chat.id, mes_id)
 
 def my_activ_trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
@@ -1231,6 +1218,62 @@ def my_history_trips_interface(message, message_id, page=0):
     bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
                           text=f"page {page + 1}",
                           reply_markup=bottons)
+
+
+def data_profile_interface(message, user_id):
+    do_del_mes(user_id=message.chat.id)
+
+    bottons = types.InlineKeyboardMarkup(row_width=2)
+
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_profile")
+
+    bottons.add(button_back_to_menu)
+
+    user_data = get_user_info(user_id)
+
+    if user_data['photo_id'] != -1:
+        mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
+        write_for_del_mes(message.chat.id, mes_id)
+
+    mes_id = bot.send_message(chat_id=message.chat.id,
+                          text=f"Профиль меню\n\n"
+                               f"ФИО: {user_data['name']}\n"
+                               f"Номер телефона: +{user_data['phone_number']}\n"
+                               f"Телеграмм: @{user_data['alies']}\n",
+                          reply_markup=bottons).message_id
+
+    write_for_del_mes(message.chat.id, mes_id)
+
+
+def my_data_profile_interface(message, message_id):
+    do_del_mes(user_id=message.chat.id)
+
+    bottons = types.InlineKeyboardMarkup(row_width=2)
+
+    button_edit_profile_name = types.InlineKeyboardButton(f"Изменить Имя", callback_data=f"button_edit_profile_name")
+    button_edit_profile_phone = types.InlineKeyboardButton(f"Изменить Номер", callback_data=f"button_edit_profile_phone")
+    button_edit_profile_photo = types.InlineKeyboardButton(f"Изменить Фото", callback_data=f"button_edit_profile_photo")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_profile")
+
+    bottons.add(button_edit_profile_name)
+    bottons.add(button_edit_profile_phone)
+    bottons.add(button_edit_profile_photo)
+    bottons.add(button_back_to_menu)
+
+    user_data = get_user_info(message.chat.id)
+
+    if user_data['photo_id'] != -1:
+        mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
+        write_for_del_mes(message.chat.id, mes_id)
+
+    mes_id = bot.send_message(chat_id=message.chat.id,
+                          text=f"Профиль меню\n\n"
+                               f"ФИО: {user_data['name']}\n"
+                               f"Номер телефона: +{user_data['phone_number']}\n"
+                               f"Телеграмм: @{user_data['alies']}\n",
+                          reply_markup=bottons).message_id
+
+    write_for_del_mes(message.chat.id, mes_id)
 
 
 def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=False):
@@ -1359,7 +1402,42 @@ def message_to_bot(message):
         del_flag(message.chat.id)
         write_flag(message.chat.id, message.text)
 
-    bot.delete_message(message.chat.id, message.message_id)
+    elif read_flag(message.chat.id) == 'edit_profile_name':
+        edit_user_name(message.chat.id, message.text)
+        del_flag(message.chat.id)
+        start(message)
+
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
+
+
+@bot.message_handler(content_types=['photo'])
+def message_to_bot(message):
+    if read_flag(message.chat.id) == 'edit_profile_photo':
+        edit_user_photo_id(message.chat.id, message.photo[-1].file_id)
+        del_flag(message.chat.id)
+        start(message)
+
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
+
+
+@bot.message_handler(content_types=['contact'])
+def message_to_bot(message):
+    if read_flag(message.chat.id) == 'edit_profile_phone':
+        phone_number = message.contact.phone_number
+        edit_user_phone_number(message.chat.id, phone_number)
+        del_flag(message.chat.id)
+        start(message)
+
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -1499,7 +1577,7 @@ def callback_inline(call):
                 pass
 
         elif call.data == 'button_my_data_profile':
-            menu_interface(call.message, message_id)
+            my_data_profile_interface(call.message, message_id)
 
 
         elif str(call.data).split("_")[0] == "trip":
@@ -1519,13 +1597,41 @@ def callback_inline(call):
             except Exception as Ex:
                 print(Ex)
 
-            df = pd.read_csv('active_trips.csv')
+            df = pd.read_csv('data/active_trips.csv')
 
             df = del_active_trip(df, int(str(call.data).split("_")[-1]))
 
-            df.to_csv('active_trips.csv', index=False)
+            df.to_csv('data/active_trips.csv', index=False)
 
             my_activ_trips_interface(call.message, message_id)
+
+
+        elif str(call.data).split("_") == 'button_edit_profile_name'.split("_"):
+            del_flag(call.message.chat.id)
+            write_flag(call.message.chat.id, "edit_profile_name")
+            do_del_mes(call.message.chat.id)
+            mes_id = bot.send_message(chat_id=call.message.chat.id,
+                                  text=f"Напиши имя").message_id
+            write_for_del_mes(call.message.chat.id, mes_id)
+
+        elif str(call.data).split("_") == 'button_edit_profile_phone'.split("_"):
+            del_flag(call.message.chat.id)
+            write_flag(call.message.chat.id, "edit_profile_phone")
+            do_del_mes(call.message.chat.id)
+            markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+            button_phone = types.KeyboardButton(text="Отправить номер телефона", request_contact=True)
+            markup.add(button_phone)
+            mes_id = bot.send_message(chat_id=call.message.chat.id,
+                                      text=f"Отправь номер телефона", reply_markup=markup).message_id
+            write_for_del_mes(call.message.chat.id, mes_id)
+
+        elif str(call.data).split("_") == 'button_edit_profile_photo'.split("_"):
+            del_flag(call.message.chat.id)
+            write_flag(call.message.chat.id, "edit_profile_photo")
+            do_del_mes(call.message.chat.id)
+            mes_id = bot.send_message(chat_id=call.message.chat.id,
+                                      text=f"Отправь фото").message_id
+            write_for_del_mes(call.message.chat.id, mes_id)
 
 
 if __name__ == '__main__':
