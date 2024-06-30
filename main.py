@@ -130,7 +130,6 @@ def add_user(user_id, alies):
         'photo_id': ['-1'],
         'phone_number': ['Неизвестный']
     })
-
     user_data.to_csv("data/users_data.csv", mode='a', header=False, index=False, encoding='utf-8')
 
 
