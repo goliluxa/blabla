@@ -1365,7 +1365,11 @@ def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=
 # ============================== обработка данных ==============================
 @bot.message_handler(content_types=['text'])
 def message_to_bot(message):
-    user_flag = read_flag(message.chat.id).split("_")[0]
+    try:
+        user_flag = read_flag(message.chat.id).split("_")[0]
+    except:
+        user_flag = ''
+
 
     if user_flag == 'Descriptionn':
         bottons = types.InlineKeyboardMarkup(row_width=7)
@@ -1443,10 +1447,13 @@ def message_to_bot(message):
 
 @bot.message_handler(content_types=['photo'])
 def message_to_bot(message):
-    if read_flag(message.chat.id) == 'edit_profile_photo':
-        edit_user_photo_id(message.chat.id, message.photo[-1].file_id)
-        del_flag(message.chat.id)
-        start(message)
+    try:
+        if read_flag(message.chat.id) == 'edit_profile_photo':
+            edit_user_photo_id(message.chat.id, message.photo[-1].file_id)
+            del_flag(message.chat.id)
+            start(message)
+    except:
+        pass
 
     try:
         bot.delete_message(message.chat.id, message.message_id)
