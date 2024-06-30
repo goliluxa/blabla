@@ -384,32 +384,35 @@ def get_name_by_name2(name2):
 
 # ============================== главные функции ==============================
 @bot.message_handler(commands=['start'])
-def start(message, real=False):
+def start(message, real=True):
     try:
         if message.text.split()[1].split("_")[0] == 'profile':
             data_profile_interface(message, int(message.text.split()[1].split("_")[1]))
         if not cheak_new_user(user_id=message.chat.id):
             bot.delete_message(message.chat.id, message.message_id)
+
+        real = False
     except:
         pass
-    user_id = message.chat.id
-    del_flag(user_id)
-    do_del_mes(user_id=user_id)
+    if real:
+        user_id = message.chat.id
+        del_flag(user_id)
+        do_del_mes(user_id=user_id)
 
-    if cheak_new_user(user_id=user_id):
-            add_user(user_id, message.chat.username)
-            message_id = bot.send_message(user_id, f"Открываю").message_id
-            menu_interface(message, message_id)
-            write_for_del_mes(user_id, message_id)
+        if cheak_new_user(user_id=user_id):
+                add_user(user_id, message.chat.username)
+                message_id = bot.send_message(user_id, f"Открываю").message_id
+                menu_interface(message, message_id)
+                write_for_del_mes(user_id, message_id)
 
-    else:
-            try:
-                bot.delete_message(user_id, message.message_id)
-            except:
-                pass
-            message_id = bot.send_message(user_id, f"Открываю").message_id
-            menu_interface(message, message_id)
-            write_for_del_mes(user_id, message_id)
+        else:
+                try:
+                    bot.delete_message(user_id, message.message_id)
+                except:
+                    pass
+                message_id = bot.send_message(user_id, f"Открываю").message_id
+                menu_interface(message, message_id)
+                write_for_del_mes(user_id, message_id)
 
 
 @bot.message_handler(commands=['go'])
