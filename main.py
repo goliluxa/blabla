@@ -1241,11 +1241,12 @@ def data_profile_interface(message, user_id):
     bottons.add(button_back_to_menu)
 
     user_data = get_user_info(user_id)
-
-    if user_data['photo_id'] != "-1":
-        mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
-        write_for_del_mes(message.chat.id, mes_id)
-
+    try:
+        if user_data['photo_id'] != "-1":
+            mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
+            write_for_del_mes(message.chat.id, mes_id)
+    except:
+        pass
     mes_id = bot.send_message(chat_id=message.chat.id,
                           text=f"Профиль меню\n\n"
                                f"ФИО: {user_data['name']}\n"
@@ -1272,9 +1273,12 @@ def my_data_profile_interface(message, message_id):
     bottons.add(button_back_to_menu)
 
     user_data = get_user_info(message.chat.id)
-    if user_data['photo_id'] != "-1":
-        mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
-        write_for_del_mes(message.chat.id, mes_id)
+    try:
+        if user_data['photo_id'] != "-1":
+            mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
+            write_for_del_mes(message.chat.id, mes_id)
+    except:
+        pass
 
     mes_id = bot.send_message(chat_id=message.chat.id,
                           text=f"Профиль меню\n\n"
