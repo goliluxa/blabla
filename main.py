@@ -385,25 +385,30 @@ def get_name_by_name2(name2):
 # ============================== главные функции ==============================
 @bot.message_handler(commands=['start'])
 def start(message):
-    if len(message.text.split()) > 1:
+    try:
         if message.text.split()[1].split("_")[0] == 'profile':
             data_profile_interface(message, int(message.text.split()[1].split("_")[1]))
-    else:
+        if not cheak_new_user(user_id=message.chat.id):
+            bot.delete_message(message.chat.id, message.message_id)
+    except:
         user_id = message.chat.id
         del_flag(user_id)
         do_del_mes(user_id=user_id)
 
         if cheak_new_user(user_id=user_id):
-            add_user(user_id, message.chat.username)
-            message_id = bot.send_message(user_id, f"Открываю").message_id
-            menu_interface(message, message_id)
-            write_for_del_mes(user_id, message_id)
+                add_user(user_id, message.chat.username)
+                message_id = bot.send_message(user_id, f"Открываю").message_id
+                menu_interface(message, message_id)
+                write_for_del_mes(user_id, message_id)
 
         else:
-            bot.delete_message(user_id, message.message_id)
-            message_id = bot.send_message(user_id, f"Открываю").message_id
-            menu_interface(message, message_id)
-            write_for_del_mes(user_id, message_id)
+                try:
+                    bot.delete_message(user_id, message.message_id)
+                except:
+                    pass
+                message_id = bot.send_message(user_id, f"Открываю").message_id
+                menu_interface(message, message_id)
+                write_for_del_mes(user_id, message_id)
 
 
 @bot.message_handler(commands=['go'])
@@ -1115,8 +1120,9 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
                               reply_markup=bottons)
 
 
-def profile_interface(message, message_id):
-    do_del_mes(message.chat.id)
+def profile_interface(message, message_id, need_del=False):
+    if need_del:
+        do_del_mes(message.chat.id)
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
     button_my_activ_trips = types.InlineKeyboardButton(f"Активные поездки", callback_data=f"button_my_activ_trips")
@@ -1128,11 +1134,16 @@ def profile_interface(message, message_id):
     bottons.add(button_my_data_profile)
     bottons.add(button_back_to_menu)
 
-    mes_id = bot.send_message(chat_id=message.chat.id,
-                          text=f"Профиль меню",
-                          reply_markup=bottons).message_id
+    if need_del:
+        mes_id = bot.send_message(chat_id=message.chat.id,
+                              text=f"Профиль меню",
+                              reply_markup=bottons).message_id
 
-    write_for_del_mes(message.chat.id, mes_id)
+        write_for_del_mes(message.chat.id, mes_id)
+    else:
+        bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
+                         text=f"Профиль меню",
+                         reply_markup=bottons)
 
 def my_activ_trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
@@ -1225,20 +1236,20 @@ def data_profile_interface(message, user_id):
 
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_profile")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile_back")
 
     bottons.add(button_back_to_menu)
 
     user_data = get_user_info(user_id)
 
-    if user_data['photo_id'] != -1:
+    if user_data['photo_id'] != "-1":
         mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
         write_for_del_mes(message.chat.id, mes_id)
 
     mes_id = bot.send_message(chat_id=message.chat.id,
                           text=f"Профиль меню\n\n"
                                f"ФИО: {user_data['name']}\n"
-                               f"Номер телефона: +{user_data['phone_number']}\n"
+                               f"Номер телефона: {'+' if user_data['phone_number'] != 'Неизвестный' else ''}{user_data['phone_number']}\n"
                                f"Телеграмм: @{user_data['alies']}\n",
                           reply_markup=bottons).message_id
 
@@ -1253,7 +1264,7 @@ def my_data_profile_interface(message, message_id):
     button_edit_profile_name = types.InlineKeyboardButton(f"Изменить Имя", callback_data=f"button_edit_profile_name")
     button_edit_profile_phone = types.InlineKeyboardButton(f"Изменить Номер", callback_data=f"button_edit_profile_phone")
     button_edit_profile_photo = types.InlineKeyboardButton(f"Изменить Фото", callback_data=f"button_edit_profile_photo")
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню", callback_data=f"button_profile")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно", callback_data=f"button_profile_back")
 
     bottons.add(button_edit_profile_name)
     bottons.add(button_edit_profile_phone)
@@ -1261,15 +1272,14 @@ def my_data_profile_interface(message, message_id):
     bottons.add(button_back_to_menu)
 
     user_data = get_user_info(message.chat.id)
-
-    if user_data['photo_id'] != -1:
+    if user_data['photo_id'] != "-1":
         mes_id = bot.send_photo(message.chat.id, user_data['photo_id']).message_id
         write_for_del_mes(message.chat.id, mes_id)
 
     mes_id = bot.send_message(chat_id=message.chat.id,
                           text=f"Профиль меню\n\n"
                                f"ФИО: {user_data['name']}\n"
-                               f"Номер телефона: +{user_data['phone_number']}\n"
+                               f"Номер телефона: {'+' if user_data['phone_number'] != 'Неизвестный' else ''}{user_data['phone_number']}\n"
                                f"Телеграмм: @{user_data['alies']}\n",
                           reply_markup=bottons).message_id
 
@@ -1459,6 +1469,9 @@ def callback_inline(call):
         elif call.data == 'button_profile':
             profile_interface(call.message, message_id)
 
+        elif call.data == 'button_profile_back':
+            profile_interface(call.message, message_id, need_del=True)
+
         elif call.data == 'button_back_to_menu':
             menu_interface(call.message, message_id)
 
@@ -1595,7 +1608,7 @@ def callback_inline(call):
             try:
                 bot.delete_message(-1002201873715, trip_data['message_id'])
             except Exception as Ex:
-                print(Ex)
+                pass
 
             df = pd.read_csv('data/active_trips.csv')
 

@@ -1,3 +1,1 @@
 user_id,unic_trip_id,message_id,trip_type,from_city,end_city,date_trip,time_trip,price_trip,description_trip,list_people_id,is_verified,is_arhive,is_users_have_report,admins_list
-1215162451,1,65,Уеду,Чебоксары,Иннополис,30=06=2024,04=24,250,fsd,[],False,False,False,[]
-1215162451,2,66,Подвезу,Иннополис,Казань,30=06=2024,04=28,250,jhk,[],False,False,False,[]
