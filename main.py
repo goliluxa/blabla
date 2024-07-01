@@ -11,19 +11,13 @@ from multiprocessing import Process
 bot = telebot.TeleBot(token)
 
 
-# -1002201873715
-
 def analis_data():
     while True:
-        # print("Scan csv...")
-        # Чтение CSV-файла
         df1 = pd.read_csv('data/active_trips.csv')
 
-        # Текущая дата и время
         now = datetime.now()
 
         for index, row in df1.iterrows():
-            # Проверка условия message_id == -1
             if row['message_id'] == -1:
                 emoji = ''
                 if row['trip_type'] == 'Подвезу':
@@ -57,9 +51,6 @@ def analis_data():
 
                 df1.loc[index, 'message_id'] = message_id_
 
-
-
-            # Проверка даты и времени поездки
             date_trip = datetime.strptime(row['date_trip'], '%d=%m=%Y')
             time_trip = datetime.strptime(row['time_trip'], '%H=%M').time()
             trip_datetime = datetime.combine(date_trip, time_trip)
@@ -71,9 +62,7 @@ def analis_data():
                     continue
                 df1 = archived_trip(df1, row['unic_trip_id'])
 
-        # Сохранение изменений в CSV-файл
         df1.to_csv('data/active_trips.csv', index=False)
-        # Задержка на 30 секунд перед следующей проверкой
         time.sleep(3)
 
 
@@ -87,7 +76,6 @@ def write_log(user_id, username, action):
                 'username': username,
                 "action": action.replace("\n", " ")
             }
-            # Записываем данные в файл
             writer.writerow(data_)
     except:
         with open("data/logs.csv", mode='a', newline='', encoding='utf-8') as csv_file:
@@ -97,7 +85,6 @@ def write_log(user_id, username, action):
                 'username': username,
                 "action": action
             }
-            # Записываем данные в файл
             writer.writerow(data_)
 
 
@@ -217,17 +204,14 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
                 date_trip=None, time_trip=None, price_trip=None, description_trip=None,
                 list_people_id=None, is_verified=None, is_arhive=None, is_users_have_report=None, admins_list=[],
                 all_trips=False):
-    # Чтение данных из CSV файла
     df = pd.read_csv('data/active_trips.csv')
 
-    # Функция для сохранения изменений в CSV файл
     def save_to_csv(dataframe):
         dataframe.to_csv('data/active_trips.csv', index=False)
 
     if all_trips:
         return df.to_dict('records')
 
-    # Если указан только unic_trip_id и все остальные параметры равны None
     elif unic_trip_id is not None and user_id is None and message_id is None and trip_type is None and from_city is None \
             and end_city is None and date_trip is None and time_trip is None and price_trip is None \
             and description_trip is None and list_people_id is None and is_verified is None \
@@ -235,7 +219,6 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
         result = df[df['unic_trip_id'] == unic_trip_id]
         return result.to_dict('records')
 
-        # Если указан только user_id и все остальные параметры равны None
     elif user_id is not None and unic_trip_id is None and message_id is None and trip_type is None and from_city is None \
             and end_city is None and date_trip is None and time_trip is None and price_trip is None \
             and description_trip is None and list_people_id is None and is_verified is None \
@@ -243,7 +226,6 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
         result = df[df['user_id'] == user_id]
         return result.to_dict('records')
 
-    # Если unic_trip_id=None, записываем новые данные в БД
     elif unic_trip_id is None:
         new_unic_trip_id = 1
         try:
@@ -269,12 +251,10 @@ def active_trip(user_id=None, unic_trip_id=None, message_id=None, trip_type=None
             'is_users_have_report': False,
             'admins_list': admins_list
         }
-        # df = df.append(new_data, ignore_index=True)
         df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
         save_to_csv(df)
         return new_unic_trip_id
 
-    # Если unic_trip_id указан, обновляем данные по этому уникальному идентификатору
     elif unic_trip_id is not None:
         mask = (df['unic_trip_id'] == unic_trip_id)
         if mask.any():
@@ -307,13 +287,10 @@ def archived_trip(df=None, unic_trip_id=None, user_id=None):
     if unic_trip_id is not None and df is None:
         result = df_archived[(df_archived['unic_trip_id'] == unic_trip_id) & (df_archived['user_id'] == user_id)]
         return result.to_dict('records')
-    # Загружаем данные из CSV файлов
     df_active = df
 
-    # Найти индекс строки с заданным unic_trip_id в df_active
     index_to_move = df_active.index[df_active['unic_trip_id'] == unic_trip_id].tolist()
 
-    # Получаем строку для перемещения
     trip_to_move = df_active.loc[index_to_move[0]]
 
     new_unic_trip_id = 1
@@ -326,29 +303,16 @@ def archived_trip(df=None, unic_trip_id=None, user_id=None):
     trip_to_move = trip_to_move.copy()
     trip_to_move['unic_trip_id'] = new_unic_trip_id
 
-    # Удаляем строку из df_active
     df_active = del_active_trip(df_active, unic_trip_id=unic_trip_id)
 
-    # Добавляем строку в df_archived
     df_archived = pd.concat([df_archived, trip_to_move.to_frame().T], ignore_index=True)
 
-    # Сохраняем изменения в CSV файлы
     df_archived.to_csv('data/archived_trips.csv', index=False)
     return df_active
 
 
 def del_active_trip(df, unic_trip_id):
-    # Step 1: Read the CSV file into a DataFrame
-    # df = pd.read_csv('active_trips.csv')
-
-    # Step 2: Locate the row(s) where unic_trip_id matches
     df = df[df['unic_trip_id'] != unic_trip_id]
-    # print(unic_trip_id)
-
-    # Step 3: Delete the row(s) from the DataFrame
-    # df.drop(rows_to_delete, inplace=True)
-
-    # Step 4: Save the updated DataFrame back to the CSV file
     return df
 
 
@@ -416,13 +380,6 @@ def start(message, real=True):
                 write_for_del_mes(user_id, message_id)
 
 
-@bot.message_handler(commands=['go'])
-def go(message):
-    bot.send_message(chat_id=-1002201873715,
-                     text="текст\n"
-                          "<a href='https://t.me/poputi_inno_bot?start=profile_'>link text</a>", parse_mode="html")
-
-
 # ============================== интерфейсы ==============================
 def menu_interface(message, message_id):
     bottons = types.InlineKeyboardMarkup(row_width=3)
@@ -474,10 +431,7 @@ def creat_trip_interface(message, message_id):
 def trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-    # filters = types.InlineKeyboardButton(f"filters", callback_data=f"filters")
     button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
-
-    # bottons.add(filters)
 
     list_of_active_trips = active_trip(all_trips=True)
 
@@ -494,6 +448,7 @@ def trips_interface(message, message_id, page=0):
         bottons.add(types.InlineKeyboardButton(
             f"{emoji} {i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
             callback_data=f"trip_{i['unic_trip_id']}"))
+
     if len(split_list_of_active_trips) > 1:
         if page == 0:
             right = types.InlineKeyboardButton(f"▶️", callback_data=f"right_{page + 1}")
@@ -557,7 +512,6 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
         d = int(date_trip.split(cr)[0])
         m = int(date_trip.split(cr)[1])
-        y = int(date_trip.split(cr)[2])
 
         H = int(time_trip.split(cr)[0])
         M = int(time_trip.split(cr)[1])
@@ -776,7 +730,6 @@ def new_trip_interface(message, message_id, step=1, from_city='', end_city='', d
 
         d = int(date_trip.split(cr)[0])
         m = int(date_trip.split(cr)[1])
-        y = int(date_trip.split(cr)[2])
 
         H = int(time_trip.split(cr)[0])
         M = int(time_trip.split(cr)[1])
@@ -994,7 +947,6 @@ def taxi_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
         d = int(date_trip.split(cr)[0])
         m = int(date_trip.split(cr)[1])
-        y = int(date_trip.split(cr)[2])
 
         H = int(time_trip.split(cr)[0])
         M = int(time_trip.split(cr)[1])
@@ -1182,6 +1134,7 @@ def my_activ_trips_interface(message, message_id, page=0):
         bottons.add(types.InlineKeyboardButton(
             f"{emoji} {i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
             callback_data=f"my_activ_trip_{i['unic_trip_id']}"))
+
     if len(split_list_of_active_trips) > 1:
         if page == 0:
             right = types.InlineKeyboardButton(f"▶️", callback_data=f"activ_right_{page + 1}")
@@ -1225,6 +1178,7 @@ def my_history_trips_interface(message, message_id, page=0):
         bottons.add(types.InlineKeyboardButton(
             f"{emoji} {i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
             callback_data=f"history_trip_{i['unic_trip_id']}"))
+
     if len(split_list_of_active_trips) > 1:
         if page == 0:
             right = types.InlineKeyboardButton(f"▶️", callback_data=f"history_right_{page + 1}")
@@ -1318,7 +1272,6 @@ def trip_info_interface(message, message_id, trip_id=0, can_edit=False, history=
     else:
         if history:
             trip_data = archived_trip(unic_trip_id=trip_id, user_id=message.chat.id)[0]
-            # print(trip_data)
             bottons = types.InlineKeyboardMarkup(row_width=2)
 
             button_trips = types.InlineKeyboardButton(f"Обратно⬅️", callback_data=f"button_my_history_trips")
@@ -1630,7 +1583,6 @@ def callback_inline(call):
 
         elif str(call.data).split("_")[:-1] == 'button_del_my_trip'.split("_"):
             trip_data = active_trip(unic_trip_id=int(str(call.data).split("_")[-1]))[0]
-            # print(trip_data)
             try:
                 bot.delete_message(-1002201873715, trip_data['message_id'])
             except Exception as Ex:
@@ -1678,4 +1630,3 @@ if __name__ == '__main__':
     process.start()
     print("Starting bot...\n")
     bot.infinity_polling()
-    # analis_data()
