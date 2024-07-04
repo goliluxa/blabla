@@ -412,15 +412,15 @@ def creat_trip_interface(message, message_id):
     else:
         bottons = types.InlineKeyboardMarkup(row_width=1)
 
-        button_find_trip = types.InlineKeyboardButton(f"Хочу уехать🙋‍♂️", callback_data=f"button_find_trip")
-        button_new_trip = types.InlineKeyboardButton(f"Могу подвести🚗", callback_data=f"button_new_trip")
-        button_taxi_trip = types.InlineKeyboardButton(f"Такси🚕", callback_data=f"button_taxi_trip")
+        button_find_trip = types.InlineKeyboardButton(f"Хочу уехать 🙋‍♂️", callback_data=f"button_find_trip")
+        button_new_trip = types.InlineKeyboardButton(f"Могу подвести 🚗", callback_data=f"button_new_trip")
+        button_taxi_trip = types.InlineKeyboardButton(f"Такси 🚕", callback_data=f"button_taxi_trip")
 
         bottons.add(button_find_trip)
         bottons.add(button_new_trip)
         bottons.add(button_taxi_trip)
 
-        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
+        button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню ⬅️", callback_data=f"button_back_to_menu")
         bottons.add(button_back_to_menu)
 
         bot.edit_message_text(chat_id=message.chat.id, message_id=message_id,
@@ -431,7 +431,7 @@ def creat_trip_interface(message, message_id):
 def trips_interface(message, message_id, page=0):
     bottons = types.InlineKeyboardMarkup(row_width=2)
 
-    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню⬅️", callback_data=f"button_back_to_menu")
+    button_back_to_menu = types.InlineKeyboardButton(f"Обратно в меню ⬅️", callback_data=f"button_back_to_menu")
 
     list_of_active_trips = active_trip(all_trips=True)
 
@@ -446,7 +446,7 @@ def trips_interface(message, message_id, page=0):
         elif i['trip_type'] == 'Такси':
             emoji = '🚕'
         bottons.add(types.InlineKeyboardButton(
-            f"{emoji} {i['from_city']}-{i['end_city']}   {i['date_trip'].replace('=', '.')}   {i['time_trip'].replace('=', ':')}",
+            f"{emoji} {i['from_city']}-{i['end_city']}  {i['date_trip'].replace('=', '.')}  {i['time_trip'].replace('=', ':')}",
             callback_data=f"trip_{i['unic_trip_id']}"))
 
     if len(split_list_of_active_trips) > 1:
