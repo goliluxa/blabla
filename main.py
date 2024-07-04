@@ -1571,7 +1571,7 @@ def callback_inline(call):
                 pass
 
         elif call.data == 'button_my_data_profile':
-            my_data_profile_interface(call.message, message_id)
+            my_data_profile_interface(call.message)
 
 
         elif str(call.data).split("_")[0] == "trip":
