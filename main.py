@@ -1228,7 +1228,7 @@ def data_profile_interface(message, user_id):
     write_for_del_mes(message.chat.id, mes_id)
 
 
-def my_data_profile_interface(message, message_id):
+def my_data_profile_interface(message):
     do_del_mes(user_id=message.chat.id)
 
     bottons = types.InlineKeyboardMarkup(row_width=2)
@@ -1393,7 +1393,7 @@ def message_to_bot(message):
     elif read_flag(message.chat.id) == 'edit_profile_name':
         edit_user_name(message.chat.id, message.text)
         del_flag(message.chat.id)
-        start(message)
+        my_data_profile_interface(message)
 
     try:
         bot.delete_message(message.chat.id, message.message_id)
@@ -1407,7 +1407,7 @@ def message_to_bot(message):
         if read_flag(message.chat.id) == 'edit_profile_photo':
             edit_user_photo_id(message.chat.id, message.photo[-1].file_id)
             del_flag(message.chat.id)
-            start(message)
+            my_data_profile_interface(message)
     except:
         pass
 
@@ -1423,7 +1423,7 @@ def message_to_bot(message):
         phone_number = message.contact.phone_number
         edit_user_phone_number(message.chat.id, phone_number)
         del_flag(message.chat.id)
-        start(message)
+        my_data_profile_interface(message)
 
     try:
         bot.delete_message(message.chat.id, message.message_id)
