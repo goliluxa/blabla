@@ -1,2 +1,1 @@
 user_id,unic_trip_id,message_id,trip_type,from_city,end_city,date_trip,time_trip,price_trip,description_trip,list_people_id,is_verified,is_arhive,is_users_have_report,admins_list
-704665657,1,88,Уеду,Казань,Иннополис,06=07=2024,10=30,280,Только с работающим кондиционером,[],False,False,False,[]
