@@ -1,1 +1,3 @@
 user_id,unic_trip_id,message_id,trip_type,from_city,end_city,date_trip,time_trip,price_trip,description_trip,list_people_id,is_verified,is_arhive,is_users_have_report,admins_list
+704665657,1,89,Такси,Чебоксары,Иннополис,04=07=2024,06=28,0,Олесь,[],False,False,False,[]
+979115888,2,90,Такси,Казань,Иннополис,06=07=2024,18=41,0,Аоаоаоаоооа,[],False,False,False,[]
