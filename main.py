@@ -632,7 +632,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
                     button_plus100)
 
         ok = types.InlineKeyboardButton(f"Далее ➡️",
-                                        callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_")
+                                        callback_data=f"f_{from_city}_{end_city}_{date_trip}_{time_trip}__{price_trip}_{extra_flags}")
         button_back_to_menu = types.InlineKeyboardButton(f"Обратно ⬅️", callback_data=f"f_{from_city}_{end_city}")
         bottons.add(ok)
         bottons.add(button_back_to_menu)
@@ -646,7 +646,7 @@ def find_trip_interface(message, message_id, step=1, from_city='', end_city='', 
 
         extra_flags = extra_flags.split('.')
 
-        # print(extra_flags[0])
+        print()
 
         bottons = types.InlineKeyboardMarkup(row_width=7)
 
